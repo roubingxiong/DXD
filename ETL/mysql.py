@@ -14,6 +14,7 @@ checkAcc_date = yestoday.strftime('%Y-%m-%d')
 
 todayYYYYMMDD = today.strftime('%Y%m%d')
 
+
 class BaseReaderWriter():
     # conn, config = ''
 

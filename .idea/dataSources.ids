@@ -10,38 +10,151 @@
       <schema id="1" name="robin"/>
       <table id="2" parent="1" name="src_order"/>
       <table id="3" parent="1" name="tgt_order"/>
-      <column id="4" parent="2" name="order_num">
+      <table id="4" parent="1" name="t_approve_application_reject">
+        <comment>准入拒绝码X表</comment>
+      </table>
+      <column id="5" parent="2" name="order_num">
         <mandatory>1</mandatory>
         <data-type>varchar(11)</data-type>
       </column>
-      <column id="5" parent="2" name="product_num">
+      <column id="6" parent="2" name="product_num">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="6" parent="2" name="product_price">
+      <column id="7" parent="2" name="product_price">
         <mandatory>1</mandatory>
         <data-type>decimal(11)</data-type>
       </column>
-      <column id="7" parent="2" name="order_date">
+      <column id="8" parent="2" name="order_date">
         <mandatory>1</mandatory>
         <data-type>date</data-type>
       </column>
-      <column id="8" parent="3" name="order_num">
+      <column id="9" parent="3" name="order_num">
         <mandatory>1</mandatory>
         <data-type>varchar(11)</data-type>
       </column>
-      <column id="9" parent="3" name="product_num">
+      <column id="10" parent="3" name="product_num">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="10" parent="3" name="product_price">
+      <column id="11" parent="3" name="product_price">
         <mandatory>1</mandatory>
         <data-type>decimal(11)</data-type>
       </column>
-      <column id="11" parent="3" name="order_date">
+      <column id="12" parent="3" name="order_date">
         <mandatory>1</mandatory>
         <data-type>date</data-type>
       </column>
+      <column id="13" parent="4" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="14" parent="4" name="admittance_id">
+        <comment>准入申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="15" parent="4" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="16" parent="4" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="17" parent="4" name="product_id">
+        <comment>产品ID
+触发事件源ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="18" parent="4" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="19" parent="4" name="apply_time">
+        <comment>申请时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="20" parent="4" name="decision_result">
+        <comment>决策结果</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="21" parent="4" name="reject_code">
+        <comment>拒绝码</comment>
+        <data-type>varchar(15)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="22" parent="4" name="operator_id">
+        <comment>操作人id</comment>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="23" parent="4" name="status">
+        <comment>信审状态：0-待分配 1-待初审 2-初审通过 3-初审拒绝 4-暂存 17-终审退回 18-结案拒绝 19-结案通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="24" parent="4" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="25" parent="4" name="decision_time">
+        <comment>决策完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="26" parent="4" name="final_approve_time">
+        <comment>终审时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="27" parent="4" name="update_time">
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="28" parent="4" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="29" parent="4" name="idx_admint">
+        <columns>admittance_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="30" parent="4" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="31" parent="4" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="32" parent="4" name="idx_admint">
+        <columns>admittance_id</columns>
+        <underlying-index>idx_admint</underlying-index>
+      </key>
+      <key id="33" parent="4" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
     </database-model>
   </data-source>
 </component>

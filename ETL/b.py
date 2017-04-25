@@ -20,8 +20,5 @@ from pygrametl.datasources import SQLSource
 config = ConfigParser.ConfigParser()
 config.read('init_test.cfg')
 
-config.set('global','hello','world')
-with open('init_test.cfg', 'wb') as cfg:
-    time.sleep(5)
-    config.write(cfg)
+print config.get('global', 'hello')
 
