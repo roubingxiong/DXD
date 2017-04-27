@@ -19,18 +19,19 @@ todayYYYYMMDD = today.strftime('%Y%m%d')
 
 logger = logging.getLogger('DXD_ETL')
 
+status = {'I': 'In Progress', 'S': 'Success', 'F': 'Fail'}
 
 class BaseReaderWriter():
 
-    def __init__(self, mysqlConn, coding='utf-8'): # the config file put in the same location with this script
+    def __init__(self, conn): # the config file put in the same location with this script
 
-        self.conn = mysqlConn
+        self.conn = conn
         self.status = 'I'   # I->In Progress S->Success  F->Fail
-        self.coding = coding
+        self.charset = conn.get_character_set_info()['name']
         self.etlStat = {'table': '', 'data_file': '', 'ctrl_file': '', 'ctrlCnt': '', 'data_path_file': '', 'ctrl_path_file': '', 'status': self.status, 'from_date': '9999-12-31', 'to_date': '9999-12-31'}
 
     def refreshETLStat(self, location, runDate, table):
-
+        logger.info('refreshing ETL status with the location, run date and table')
         runDateStr = datetime.datetime.strptime(runDate, '%Y-%m-%d').strftime('%Y%m%d')
         # nowStr = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
         dataFileName = table + '.dat.' + runDateStr  # + '.' + nowStr
@@ -53,9 +54,11 @@ class BaseReaderWriter():
         return self.etlStat
 
     def getColumnList(self, table):
+        logger.info('getting columns from table ddl')
         colList = []
         sql = "desc %s"% table
         try:
+            logger.info('running sql->%s', sql)
             cursor = self.conn.cursor()
             cursor.execute(sql)
             for row in cursor.fetchall():
@@ -65,23 +68,20 @@ class BaseReaderWriter():
         else:
             return colList
 
-    def setCoding(self, coding='utf-8'):
-        self.coding = coding
-        return self.coding
+    def setCharset(self, charset='utf8'):
+        self.charset = charset
+        return self.charset
 
     def setStatus(self, status='I'):
         self.status = status
         self.etlStat['status'] = self.status
         return self.status
 
-    def getToday(self):
-        return self.today
-
 
 class TableExtractor(BaseReaderWriter):
 
-    def __init__(self, mysqlConn):
-        BaseReaderWriter.__init__(self,mysqlConn)
+    def __init__(self, conn):
+        BaseReaderWriter.__init__(self, conn)
 
     def extractTableToFile(self, table, location, runDate='9999-12-31', loadType='INC', delimiter='|'):
 
@@ -93,9 +93,10 @@ class TableExtractor(BaseReaderWriter):
         toDate = self.etlStat['to_date']
 
         try:
-            dataFile = codecs.open(dataFilePathName, 'w', self.coding)
-            ctrlFile = codecs.open(ctrlFilePathName, 'w', self.coding)
-        except Exception:
+            dataFile = codecs.open(dataFilePathName, 'w', self.charset)
+            ctrlFile = codecs.open(ctrlFilePathName, 'w', self.charset)
+        except Exception as e:
+            logger.exception(e.message)
             raise
 
         colList = self.getColumnList(table)
@@ -110,68 +111,63 @@ class TableExtractor(BaseReaderWriter):
                 colStr = colStr + ', ' + colList[index]
                 header = header + separator + colList[index]
 
-        print "-INFO: column-> " + colStr
-        print "-INFO: header-> " + header
+        logger.info('column->%s',colStr)
+        logger.debug('header->%s',header)
 
         startRow = 0
         toRow = 1000
-        if loadType == 'INC':
-            sql = "select concat_ws('%s',%s) FROM %s WHERE update_time >= '%s' AND update_time < '%s';"% (separator,colStr,table, fromDate, toDate)
-        elif loadType == 'FULL':
-            # sql = "select SQL_CALC_FOUND_ROWS concat_ws('%s',%s) FROM %s limit %s, %s;"% (separator,colStr,table, startRow, toRow)
-            sql = "select SQL_CALC_FOUND_ROWS concat_ws('%s',%s) FROM %s " % (separator, colStr, table)
-        else:
-            print "-INFO: only 'INC'->incremental extract and 'FULL' full extract are accepted. invalid load Type %s "% loadType
 
-        row_cnt_sql = "select FOUND_ROWS()"
-
-        cursor = self.conn.cursor()
-
-
+        # src_inc_id_sql = "select id, update_time FROM %s WHERE update_time>='%s' and update_time<'%s';"%(table, fromDate, toDate)
+        # src_cnt_sql = "select count(1) from %s WHERE update_time>='%s' and update_time<'%s';"%(table, fromDate, toDate)
+        ex_sql = "select concat_ws('%s',%s) FROM %s where update_time>='%s' and update_time<'%s';" % (separator, colStr, table, fromDate, toDate)
 
         try:
-            print "-INFO: running sql->\n" + sql
-
-            cursor.execute(sql)
+            logger.info('running extract sql->%s', ex_sql)
+            cursor = self.conn.cursor()
+            cursor.execute(ex_sql)
             ctrlCnt = cursor.rowcount;
 
-            # cursor.execute(row_cnt_sql)
-            # ctrlCnt = long(cursor.fetchone()[0])
-
-            print ctrlCnt
-            print "-INFO: writing data file..."
+            logger.info('writing records to data file->%s',dataFilePathName)
             dataFile.write(header + '\n')
             for row in cursor.fetchall():
                 dataFile.write(row[0] + '\n')
                 dataFile.flush()
 
-             #write information in ctrl file
-            print "-INFO: writing control file..."
+            logger.info('writing control file->%s',ctrlFilePathName)
             ctrlFile.writelines([str(ctrlCnt), '\n', table, '\n', runDate, '\n', separator])
 
             self.etlStat['ctrlCnt'] = ctrlCnt
             self.etlStat['status'] = 'S'
 
-        except:
+        except Exception as e:
+            logger.exception(e.message)
             self.conn.rollback()
             self.etlStat['status'] = 'F'
-            print "-ERROR: error happened while writing data and control file"
-            # os.remove()
+            ctrlFile.close()
+            dataFile.close()
+            # os.remove(dataFilePathName)
+            # os.remove(ctrlFilePathName)
+            logger.error('Exception occured, all database operation rollback')
             raise
+        else:
+            logger.info('Congrats! Table extracted successfully!')
+
         finally:
             ctrlFile.close()
             dataFile.close()
+            logger.info('close database connection')
+            self.conn.close()
             return self.etlStat
 
 
 
 class TableLoader(BaseReaderWriter):
 
-    def __init__(self, mysqlConn):
+    def __init__(self, conn):
         # self.conn = mysqlConn #MySQLdb.connect()
-        BaseReaderWriter.__init__(self, mysqlConn)
+        BaseReaderWriter.__init__(self, conn)
 
-    def loadFileToTable(self, table, location, runDate='9999-12-31'):
+    def loadFileToTable(self, table, location, runDate='9999-12-31', checkCtrlFile='Y'):
 
         self.refreshETLStat(location, runDate, table)
 
@@ -179,40 +175,47 @@ class TableLoader(BaseReaderWriter):
         dataFilePathName = self.etlStat['data_path_file']
 
         try:
-            dataFile = codecs.open(dataFilePathName, 'r', self.coding)
-            ctrlFile = codecs.open(ctrlFilePathName, 'r', self.coding)
-        except IOError, Exception:
+            dataFile = codecs.open(dataFilePathName, 'r', self.charset)
+            ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
+        except Exception as e:
+            logger.exception(e.message)
+            logger.error('failed to open data file(%s) or control file(%s)', dataFilePathName, ctrlFilePathName)
             raise
 
-        print "-INFO: reading control file->" + ctrlFilePathName
+        logger.info('reading control file->%s', ctrlFilePathName)
         ctrlInfo = ctrlFile.readlines()
         ctrlCnt = ctrlInfo[0]
         ctrlTable = ctrlInfo[1]
         ctrlDate = ctrlInfo[2]
         ctrlSeparator = ctrlInfo[3]
-
-        print "-INFO: count:%s table:%s date:%s delimiter:%s" % (ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator)
+        logger.info('Information from control file\ncount:%s\tsource table:%s\tdate:%s\tdelimiter:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator)
 
         recordList = []
 
         colStr = ''
         colPos = ''
 
-        print "-INFO: reading data file->" + dataFilePathName
+        logger.info('reading data file->%s', dataFilePathName)
         header = dataFile.readline()
         colList = header.split(ctrlSeparator)#self.getColumnList(table)
-
+        idList = []
 
         for row in dataFile.readlines():
-                recordList.append(row.split(ctrlSeparator))
+            recordList.append(row.split(ctrlSeparator))
 
-        #cntrl file validation
-        print "-INFO: control file validation "
+        for row in recordList:
+            idList.append(row[0])
+
+        logger.debug('id list->%s', idList)
+
+        logger.info('control file validation')
         rowCnt = len(recordList)
         if int(rowCnt) == int(ctrlCnt):
-            print "-INFO: row count  match control count [%s]"% rowCnt
+            # print "-INFO: row count  match control count [%s]"% rowCnt
+            logger.info('row count  match control count [%s]', rowCnt)
         else:
-            print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
+            # print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
+            logger.info('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
             self.setStatus('F')
 
 
@@ -224,37 +227,49 @@ class TableLoader(BaseReaderWriter):
                 colStr = colStr + ', ' + colList[index]
                 colPos = colPos + ',' + '%s'
 
-        print "-INFO: column-> " + colStr
+        # print "-INFO: column-> " + colStr
+        logger.info('columns in data file->%s', colStr)
 
-        sql = "INSERT INTO " + table + " (" + colStr + ") values (" + colPos + ") "
+        tgt_del_sql = "delete from %s WHERE id in "%table + str(tuple(idList)).replace('u','')
 
-        cursor = self.conn.cursor()
+        tgt_ins_sql = "INSERT INTO " + table + " (" + colStr + ") values (" + colPos + ") "
 
         try:
-            print "-INFO: running sql->\n" + sql
+            cursor = self.conn.cursor()
+            logger.info('cleaning table %s with duplicate id, sql->%s',table, tgt_del_sql)
+            cursor.execute(tgt_del_sql)
+            logger.debug("delete %s history rows",cursor.rowcount)
 
-            step = 10000
+            logger.info('loading data into target table')
+            step = 1000
             for i in range(0, rowCnt, step):
                 if i + step >= rowCnt:
-                    print "-INFO: inserting " + str(rowCnt%step) + " rows"
+                    # print "-INFO: inserting " + str(rowCnt%step) + " rows"
+                    logger.debug('inserting %s rows', rowCnt%step)
                 else:
-                    print "-INFO: inserting " + str(step) + " rows"
+                    # print "-INFO: inserting " + str(step) + " rows"
+                    logger.debug('inserting %s rows', step)
 
-                cursor.executemany(sql, recordList[i:i+step])
+                cursor.executemany(tgt_ins_sql, recordList[i:i+step])
 
             self.conn.commit()
 
-        except Exception:
+        except Exception as e:
+            logger.exception(e.message)
             self.conn.rollback()
             self.setStatus('F')
-            print "-ERROR: errors occurs while inserting records, the transaction roll back, database would not be effected"
+            # print "-ERROR: errors occurs while inserting records, the transaction roll back, database would not be effected"
+            logger.error('errors occurs while inserting records, the transaction roll back, database would not be effected')
             raise
         else:
             self.setStatus('S')
-            print "-INFO: Congrats! File loading success"
+            # print "-INFO: Congrats! File loading success"
+            logger.info('Congrats! File loading successfully')
         finally:
             ctrlFile.close()
             dataFile.close()
+            logger.info('close database connection')
+            self.conn.close()
             return self.etlStat
 
     #MySQLdb

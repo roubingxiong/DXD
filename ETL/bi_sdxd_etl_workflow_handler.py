@@ -12,6 +12,8 @@ import logging.config
 import ConfigParser
 from FileWatcher import *
 
+from sendEmail import *
+
 from MySqlReaderWriter import TableExtractor, TableLoader
 
 def usage():
@@ -97,53 +99,47 @@ def main():
         exit(1)
 
 
-    logger.debug('')
-    conn = getConnByType(config,jobType)
-
-    charset = config.get('global','charset')
-    extractor = TableExtractor(conn, charset)
-
-    etlStat = extractor.extractTableToFile(tblName, datahub, runDate, 'FULL')
-
-    if etlStat['status'] == 'S':
-        print "-INFO: extract success"
-    else:
-        print "-INFO: extract fail"
-
-
-    print "-INFO: ------------load file into table-------------"
-    dataHub = config.get('global', 'dataHub')
-
-    jobType = 'load'
-    conn = getConnByType(config, jobType)
-
-    print "-INFO: create a file watcher"
-    filewatcher = FileWatcher(dataHub)
-
-    if filewatcher.watch_file(tblName+'.ctrl.20170422'):
-        loader = TableLoader(conn)
-        loader.loadFileToTable(tblName, datahub, runDate)
-
-    conn.close()
-
-
-def getConnByType(config, jobType):
 
     if jobType == 'extract':
-        type = 'source'
-    elif jobType == 'load':
-        type = 'target'
+        srcConn = getConnByType(config,'source')
+
+        logger.info('creating Table Extractor')
+        worker = TableExtractor(srcConn)
+
+        etlStat = worker.extractTableToFile(tblName, datahub, runDate, 'FULL')
+
     else:
-        logger.error('this action type is not supported currently')
-        logger.info('application terminate')
-        exit(1)
+        print "-INFO: create a file watcher"
+        filewatcher = FileWatcher(datahub)
+        if filewatcher.watch_file(tblName+'.ctrl.20170422'):
+            tgtConn = getConnByType(config, 'target')
+            logger.info('creating Table Loader')
+            worker = TableLoader(tgtConn)
+            etlStat = worker.loadFileToTable(tblName, datahub, runDate)
+        else:
+            logger.warn(tblName+'.ctrl.20170422'+' not exist or file watcher is time out')
+            etlStat = {}
+            etlStat['status'] = 'F'
+
+
+    if etlStat['status'] == 'S':
+        # print "-INFO: extract success"
+        logger.info('extract success')
+        sendEmail()
+    else:
+        # print "-INFO: extract fail"
+        logger.info('extract fail')
+
+
+
+def getConnByType(config, type):
 
     host = config.get(type, 'host')
     user = config.get(type, 'user')
     passwd = config.get(type, 'passwd')
     db = config.get(type, 'db')
     charset = config.get(type, 'charset')
-    logger.info('connecting %s database, host: %s\tuser:%s\tdatabase:%s', type, host, user, db)
+    logger.info('connecting %s database, host: %s\tuser:%s\tdatabase:%s\tcharset:%s', type, host, user, db, charset)
 
     try:
         conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db, charset=charset) #, charset=charset

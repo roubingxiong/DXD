@@ -8,6 +8,9 @@ import email
 import time
 import ConfigParser
 import os
+import logging
+logger = logging.getLogger('DXD_ETL')
+
 # 第三方 SMTP 服务
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.getcwd(),'init.cfg'))
@@ -15,8 +18,6 @@ config.read(os.path.join(os.getcwd(),'init.cfg'))
 mail_host=config.get('email','host')  #设置服务器
 mail_user=config.get('email','user')    #用户名
 mail_pass=config.get('email','passwd')   #口令
-
-print mail_host, mail_user, mail_pass
 
 sender = mail_user
 receivers = config.get('email','to').split(';')#['roubingxiong@163.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
@@ -126,18 +127,20 @@ messag = write_report_email(subject='BI ETL 状态报告', runDate='2017-04-23',
 message['From'] = "roubingxiong@hotmail.com"
 message['To'] = "roubingxiong@163.com"
 message['Subject'] = 'BI ETL 状态报告'
-print message
 
-try:
-    smtpObj = smtplib.SMTP()
-    # smtpObj.connect(mail_host, 25)    # 25 为 SMTP 端口号
-    smtpObj.connect(mail_host, 587)    # 25 为 SMTP 端口号
-    smtpObj.ehlo()
-    smtpObj.starttls()
-    smtpObj.ehlo()
-    smtpObj.login(mail_user,mail_pass)
-    smtpObj.sendmail(sender, receivers, message.as_string())
-    print "邮件发送成功"
-except smtplib.SMTPException:
-    print "Error: 无法发送邮件"
-    raise
+def sendEmail():
+    logger.info('sending email to: %s', message['To'])
+    try:
+        smtpObj = smtplib.SMTP()
+        # smtpObj.connect(mail_host, 25)    # 25 为 SMTP 端口号
+        smtpObj.connect(mail_host, 587)    # 25 为 SMTP 端口号
+        smtpObj.ehlo()
+        smtpObj.starttls()
+        smtpObj.ehlo()
+        smtpObj.login(mail_user,mail_pass)
+        smtpObj.sendmail(sender, receivers, message.as_string())
+        logger.info('send email successfully')
+    except smtplib.SMTPException as e:
+        logger.exception(e.message)
+        logger.error('Bad luck, failed to send email')
+        raise

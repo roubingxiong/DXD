@@ -11,12 +11,13 @@ class FileWatcher():
         if  not os.path.isdir(self.watch_dir) or not os.access(self.watch_dir, os.R_OK):
             print "-ERROR: %s is not a directory or not readable"% (self.watch_dir)
 
-    def watch_file(self, filename, expireTime=0, ):
+    def watch_file(self, filename, expireTime=10, ):
         absFile = os.path.join(self.watch_dir, filename)
 
         print "-INFO: the file watcher is watching file %s"%(absFile)
-        this = last = 0
-        while 1:
+        this = last = size = 0
+        freq = 5 #10s each check
+        for i in range(expireTime/freq):
             if os.path.isfile(absFile) and os.access(absFile, os.R_OK):
                 prop = os.stat(absFile)
                 size = prop.st_size
@@ -32,7 +33,7 @@ class FileWatcher():
             else:
                 last = this
 
-            time.sleep(5)
+            time.sleep(freq)
 
 
     def watch_dir(self):
