@@ -1,41 +1,67 @@
-# -*- coding: UTF-8 -*-
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-import os,time
+import os, sys, time
+from subprocess import call
+import logging
 
-class FileWatcher():
+logger = logging.getLogger('DXD_ETL')
 
-    def __init__(self, location):
-        self.watch_dir = os.path.abspath(location)
+# cntl = "table + '.ctrl.' + runDateStr"
 
-        if  not os.path.isdir(self.watch_dir) or not os.access(self.watch_dir, os.R_OK):
-            print "-ERROR: %s is not a directory or not readable"% (self.watch_dir)
+def watch_file(dir, filename, expireTime=180):
+    absFile = os.path.join(dir, filename)
+    logger.info('start watching file %s', absFile)
+    # print "-INFO: start watching file %s"%(absFile)
 
-    def watch_file(self, filename, expireTime=10, ):
-        absFile = os.path.join(self.watch_dir, filename)
+    this = last = size = 0
 
-        print "-INFO: the file watcher is watching file %s"%(absFile)
-        this = last = size = 0
-        freq = 5 #10s each check
-        for i in range(expireTime/freq):
-            if os.path.isfile(absFile) and os.access(absFile, os.R_OK):
-                prop = os.stat(absFile)
-                size = prop.st_size
-                this = prop.st_mtime
-                print this, last
+    freq = 5 #10s each check
 
-            if this == last and this <> 0:
-                print "-INFO: %s is stable"% (absFile)
-                return filename
-            elif size == 0 and this <>0:
-                print "-INFO: %s is empty file"% (absFile)
-                return False
-            else:
-                last = this
+    check_times_limitation = expireTime/freq
 
-            time.sleep(freq)
+    for i in range(check_times_limitation):
+        if os.path.isfile(absFile) and os.access(absFile, os.R_OK):
+            prop = os.stat(absFile)
+            size = prop.st_size
+            this = prop.st_mtime
+            # print this, last
+
+        if this == last and this <> 0:
+            # print "cool! the file is coming and it is stable"
+            logger.info('cool! the file is coming and it is stable')
+            return filename
+        elif size == 0 and this <>0:
+            logger.error('the file is coming, but is an empty file')
+            # print "the file is coming, but is an empty file"
+            return False
+        else:
+            last = this
+
+        time.sleep(freq)
+
+    # print 'file watching run out of time'
+    logger.error('the file is not exist, file watching run out of time')
+    return False
 
 
-    def watch_dir(self):
-        pass
+def clean_file(dir=os.getcwd(), days=7):
+    logger.info('clean files older than %s days under directory %s', days, dir)
+    now = time.time()
+    cutoff = now - (days * 86400)
 
+    files = os.listdir(dir)
+    for xfile in files:
+        file_path_name = os.path.join(dir, xfile)
+        if os.path.isfile(file_path_name):
+            t = os.stat(file_path_name)
+            c = t.st_ctime
+
+            # delete file if older than 10 days
+            if c < cutoff:
+                os.remove(file_path_name)
+                logger.info('delete file %s', xfile)
+
+# clean_file(dir=os.path.join(os.getcwd(), 'log'), days=7)
+
+# watch_file(dir=os.path.join(os.getcwd(), 'log'), filename='proj.log', expireTime=10)
