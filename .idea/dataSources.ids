@@ -157,4 +157,12 @@
       </key>
     </database-model>
   </data-source>
+  <data-source name="bi_sdxd@rm-bp1a224o5dj0p5g1e.mysql.rds.aliyuncs.com" uuid="7ccd857f-9cdb-4eb2-9a70-537e90349bab">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="sqlite - dxd.sqlite3" uuid="5e9ee085-5e81-4802-b6d5-5349618e92ab">
+    <database-info product="SQLite" version="3.8.6" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native"/>
+    <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed"/>
+    <schema name="" catalog=""/>
+  </data-source>
 </component>

@@ -12,6 +12,8 @@ import logging.config
 import ConfigParser
 import file_watcher
 
+import sqlite
+
 from email_handler import *
 
 from MySqlReaderWriter import TableExtractor, TableLoader
@@ -178,7 +180,15 @@ if __name__ == "__main__":
     logger.info('validating argument')
     messager = validate_argument(actionType, runDate, runMode, tblName, messager)
 
+    messager_list = []
+    table_list_file = config.get('global', 'tableList')
+    with open(table_list_file, 'r') as f:
+        line = str.strip(f.readline())
+        if not line == '' or not line == 'None':
+            messager['table'] = line
+            messager_list.append()
     sendJobStatusEmail(messager=messager)
+
     try:
         messager = main(messager)
     except Exception as e:

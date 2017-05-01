@@ -10,23 +10,48 @@ import logging
 import logging.config
 
 import ConfigParser
-import file_watcher
+import FileWatcher
 
-from email_handler import *
+from sendEmail import *
 
 from MySqlReaderWriter import TableExtractor, TableLoader
 
-def main(messager):
+def main(runDate, runMode, actionType, tblName):
 
-    config = messager['config']
+    logger.info('preparing environment')
+    curr_dir = os.getcwd()
 
-    runDateStr = messager['from_date']
-    tblName = messager['table']
+    logger.info('reading system configuration')
+    config = get_config(curr_dir)
 
-    format_date_str = datetime.datetime.strptime(runDateStr, '%Y-%m-%d').strftime('%Y%m%d')
+    try:
+        if runMode == 'None':
+            runMode = config.get('global', 'runMode')
+            # logger.info('get run mode %s from config file', runMode)
 
-    data_hub = config.get('global', 'dataHub')
-    messager['data_hub'] = data_hub
+        if not runDate == 'None':
+            runDate = datetime.datetime.strftime(runDate, '%Y-%m-%d')
+            logger.info('run date: %s', runDate)
+        elif not runMode == 'None':
+            offset = runMode.replace(' ', '').replace('Tt','')
+            runDate = (datetime.datetime.today() - datetime.timedelta(days=int(offset))).strftime('%Y-%m-%d')
+            logger.info('run mode: %s', runMode)
+            logger.info('run date: %s', runDate)
+    except:
+        raise
+    else:
+        logger.info('action Type: %s', actionType)
+        logger.info('table name: %s', tblName)
+
+
+    datahub = config.get('global', 'dataHub')
+
+    if os.path.isdir(datahub) and os.access(datahub, os.R_OK):
+        logger.info('data hub %s is a readable directory', datahub)
+    else:
+        logger.error('data hub %s is not a existing or readable directory, please check with your ops team', datahub)
+        logger.info('application terminate')
+        exit(1)
 
     if actionType == 'extract':
         srcConn = getConnByType(config,'source')
@@ -34,55 +59,32 @@ def main(messager):
         logger.info('creating Table Extractor')
         worker = TableExtractor(srcConn)
 
-        messager = worker.extractTableToFile(messager)
+        etlStat = worker.extractTableToFile(tblName, datahub, runDate, 'FULL')
 
     else:
-        ctrl_file = tblName+'.ctrl.' + format_date_str # tableName.ctrl.yyyymmdd
-        logger.info('watching file %s', ctrl_file)
-        if file_watcher.watch_file(dir=data_hub, filename=ctrl_file):
+        filename = tblName+'.ctrl.20170422'
+        if FileWatcher.watch_file(dir=datahub, filename=filename):
             tgtConn = getConnByType(config, 'target')
             logger.info('creating Table Loader')
             worker = TableLoader(tgtConn)
-            messager = worker.loadFileToTable(messager)
+            etlStat = worker.loadFileToTable(tblName, datahub, runDate)
         else:
-            logger.warn('%s not exist or file watcher is time out', ctrl_file)
+            logger.warn(tblName+'.ctrl.20170422'+' not exist or file watcher is time out')
             etlStat = {}
-            messager['status'] = 'Fail'
+            etlStat['status'] = 'F'
 
-    return messager
 
-def validate_argument(actionType, runDate, runMode, tblName, messager):
-    config = messager['config']
-    # runDateStr = runDate
-    try:
-        if runMode == 'None':
-            runMode = config.get('global', 'runMode')
-            # logger.info('get run mode %s from config file', runMode)
-
-        if not runDate == 'None':
-            runDateStr = datetime.datetime.strptime(runDate, '%Y%m%d').strftime('%Y-%m-%d')  # formating run date
-            logger.info('run date: %s', runDateStr)
-        elif not runMode == 'None':
-            offset = runMode.replace(' ', '').replace('Tt', '')
-            runDateStr = (datetime.datetime.today() - datetime.timedelta(days=int(offset))).strftime('%Y-%m-%d')
-            logger.info('run mode: %s', runMode)
-            logger.info('run date: %s', runDate)
-
-        messager['action'] = actionType
-        messager['table'] = tblName
-        messager['mode'] = runMode
-        messager['from_date'] = runDateStr
-    except:
-        raise
+    if etlStat['status'] == 'S':
+        # print "-INFO: extract success"
+        logger.info('extract success')
+        sendEmail()
     else:
-        logger.info('action Type: %s', actionType)
-        logger.info('table name: %s', tblName)
-
-    return messager
+        # print "-INFO: extract fail"
+        logger.info('extract fail')
 
 
-def get_config(cfg_dir):
-    cfgfile = os.path.join(cfg_dir, 'init.cfg')
+def get_config(curr_dir):
+    cfgfile = os.path.join(curr_dir, 'init.cfg')
     if os.access(cfgfile, os.R_OK) and os.stat(cfgfile).st_size > 0:
         # print "-INFO: get the system config file->" + cfgfile
         logger.info('get the system config file->%s', cfgfile)
@@ -97,7 +99,7 @@ def get_config(cfg_dir):
     return config
 
 
-def get_logger(curr_dir, tblName, runDate, start_time):
+def get_logger(curr_dir, now_timestamp):
     log_dir = os.path.join(curr_dir, 'log')
     if not os.path.isdir(log_dir):
         print '%s is not exist, now creating it'%log_dir
@@ -105,7 +107,7 @@ def get_logger(curr_dir, tblName, runDate, start_time):
 
     logger = logging.getLogger('DXD_ETL')
     logger.setLevel(logging.DEBUG)
-    logger_file = os.path.join(log_dir, os.path.basename(__file__) + '_' + tblName + '_' + runDate +  '_' + start_time+ '.log')
+    logger_file = os.path.join(log_dir, os.path.basename(__file__) + '_' + now_timestamp + '.log')
     log_file_handler = logging.FileHandler(logger_file)
     # 终端Handler
     log_console_handler = logging.StreamHandler()
@@ -141,7 +143,7 @@ def getConnByType(config, type):
 
 
 if __name__ == "__main__":
-    start_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     global today
     today = datetime.datetime.today()
     global now_timestamp
@@ -149,7 +151,7 @@ if __name__ == "__main__":
     global today_str
     today_str = today.strftime('%Y-%m-%d')
 
-    messager = {'table': '', 'action':'','data_hub':'',  'data_file': '', 'ctrl_file': '', 'ctrl_count': '', 'data_path_file': '', 'ctrl_path_file': '', 'status': 'Start', 'from_date': '9999-12-31', 'to_date': '9999-12-31','log':'log'}
+    messager = {'table': '', 'data_file': '', 'ctrl_file': '', 'ctrlCnt': '', 'data_path_file': '', 'ctrl_path_file': '', 'status': 'BEGIN', 'from_date': '9999-12-31', 'to_date': '9999-12-31','log':'log'}
 
     print '-INFO: parsing arguments'
     parser = argparse.ArgumentParser(description='Process')
@@ -164,38 +166,20 @@ if __name__ == "__main__":
     actionType = str(args.a)
     tblName = str(args.t)
 
-    curr_dir = os.getcwd()
-
     global logger
-    logger, logger_file = get_logger(curr_dir, tblName, runDate, start_time)
-    logger.info('job start at %s', start_time)
-    messager['log'] = logger_file
+    logger, logger_file = get_logger(os.getcwd(), now_timestamp)
 
-    logger.info('set configuration from config file')
-    config = get_config(cfg_dir=curr_dir)
-    messager['config'] = config
-
-    logger.info('validating argument')
-    messager = validate_argument(actionType, runDate, runMode, tblName, messager)
-
-    sendJobStatusEmail(messager=messager)
+    logger.info('')
+    sendJobStatusEmail(starttime=start_time, table=tblName, messager=messager)
     try:
-        messager = main(messager)
+        main(runDate, runMode, actionType, tblName)
     except Exception as e:
         logger.exception(e.message)
         logger.error('some exception occured, now sending error email')
-        sendJobStatusEmail(messager=messager)
+        sendJobErrorEmail(starttime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),table=tblName,messager=messager)
         raise
     else:
-        logger.info('Congrats! the processing complete successfully')
+        logger.info('Congrats! the processing complete successfully. now sending success email')
+        sendJobSuccessEmail(starttime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),table=tblName, messager=messager)
 
-    finally:
-        logger.info('clean data file older than 7 days')
-        data_file_list = file_watcher.clean_file(dir=messager['data_hub'], days=7)
-
-        logger.info('clean log file older than 30 days')
-        log_dir = os.path.dirname(logger_file)
-        log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
-
-        logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        sendJobStatusEmail(messager=messager, attachment=[logger_file])
+    logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

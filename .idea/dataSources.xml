@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="0">
+  <component name="DataSourceManagerImpl" format="xml" hash="651658848">
     <data-source source="LOCAL" name="MySQL - robin@localhost" uuid="b82b1a04-193d-41b4-a0e9-09f60baed744">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
@@ -27,6 +27,12 @@
         <property name="characterSetResults" value="utf8" />
         <property name="yearIsDateType" value="false" />
       </driver-properties>
+    </data-source>
+    <data-source source="LOCAL" name="sqlite - dxd.sqlite3" uuid="5e9ee085-5e81-4802-b6d5-5349618e92ab">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/ETL/dxd.sqlite3</jdbc-url>
     </data-source>
   </component>
 </project>

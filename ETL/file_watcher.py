@@ -9,7 +9,7 @@ logger = logging.getLogger('DXD_ETL')
 
 # cntl = "table + '.ctrl.' + runDateStr"
 
-def watch_file(dir, filename, expireTime=180):
+def watch_file(dir, filename, expireTime=20):
     absFile = os.path.join(dir, filename)
     logger.info('start watching file %s', absFile)
     # print "-INFO: start watching file %s"%(absFile)
@@ -29,10 +29,10 @@ def watch_file(dir, filename, expireTime=180):
 
         if this == last and this <> 0:
             # print "cool! the file is coming and it is stable"
-            logger.info('cool! the file is coming and it is stable')
+            logger.info('cool! %s is coming and it is stable',absFile)
             return filename
         elif size == 0 and this <>0:
-            logger.error('the file is coming, but is an empty file')
+            logger.error('%s is coming, but is an empty file', absFile)
             # print "the file is coming, but is an empty file"
             return False
         else:
@@ -41,7 +41,7 @@ def watch_file(dir, filename, expireTime=180):
         time.sleep(freq)
 
     # print 'file watching run out of time'
-    logger.error('the file is not exist, file watching run out of time')
+    logger.error('%s is not exist, file watching run out of time', absFile)
     return False
 
 
@@ -49,7 +49,7 @@ def clean_file(dir=os.getcwd(), days=7):
     logger.info('clean files older than %s days under directory %s', days, dir)
     now = time.time()
     cutoff = now - (days * 86400)
-
+    count = 0
     files = os.listdir(dir)
     for xfile in files:
         file_path_name = os.path.join(dir, xfile)
@@ -60,7 +60,10 @@ def clean_file(dir=os.getcwd(), days=7):
             # delete file if older than 10 days
             if c < cutoff:
                 os.remove(file_path_name)
-                logger.info('delete file %s', xfile)
+                count += 1
+                logger.info('remove file %s', xfile)
+    logger.info('%i file remove', count)
+    return count
 
 # clean_file(dir=os.path.join(os.getcwd(), 'log'), days=7)
 
