@@ -133,9 +133,7 @@ def getConnByType(config, type):
     try:
         conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db, charset=charset) #, charset=charset
     except Exception as e:
-        logging.exception(e.message)
-        logging.info('failed to connect database, application terminate')
-        exit(1)
+        raise
 
     return conn
 
