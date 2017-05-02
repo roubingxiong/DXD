@@ -139,20 +139,23 @@ class TableLoader(BaseReaderWriter):
         ctrlCnt = ctrlInfo[0]
         ctrlTable = ctrlInfo[1]
         ctrlDate = ctrlInfo[2]
-        ctrlSeparator = ctrlInfo[3]
-        logger.info('Information from control file\n\tcount:%s\tsource table:%s\tdate:%s\tdelimiter:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator)
+        ctrlSeparator = str(ctrlInfo[3]).strip(' ')
+        mode = ctrlInfo[4]
+        logger.info('Information from control file\n\tcount:%s\tsource table:%s\tdate:%s\tdelimiter:%s\tmode:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator,mode)
 
         logger.info('reading data file->%s', dataFilePathName)
         recordList = []
         colStr = ''
         colPos = ''
-        header = dataFile.readline()
-        colList = header.split(ctrlSeparator)#self.getColumnList(table)
+        colList = dataFile.readline().split('|')
+
+        logger.debug(colList)
+
         id_index = colList.index('id')  # got index of the field called "id"
         idList = []
 
         for row in dataFile.readlines():
-            row_list = row.split(ctrlSeparator)
+            row_list = row.split('|')
             idList.append(row_list[id_index])
             recordList.append(row_list)
 

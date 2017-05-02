@@ -141,7 +141,7 @@ def get_logger(curr_dir, tblName, runDate, start_time):
     # 终端Handler
     log_console_handler = logging.StreamHandler()
     log_console_handler.setLevel(logging.DEBUG)
-    log_formater = logging.Formatter('%(asctime)s - %(levelname)s - [%(name)s] - [%(filename)s]  - %(funcName)s - %(message)s')
+    log_formater = logging.Formatter('%(asctime)s - %(levelname)s - [%(name)s] - %(filename)s  - %(funcName)s - %(message)s')
     log_file_handler.setFormatter(log_formater)
     log_console_handler.setFormatter(log_formater)
     logger.addHandler(log_file_handler)

@@ -123,12 +123,12 @@ def write_report_email(messager={}, attachment=[]):
 
 def sendJobStatusEmail(messager={}, attachment=[]):
 
-    wait = 10
+    wait = 20
     try:
         sendEmail(messager, attachment)
     except Exception as e:
         logger.exception(e.message)
-        logger.warn('exception occured while sending email, resend it in %s seconds', wait)
+        logger.warn('exception occured while sending email, resend it %s seconds later', wait)
         time.sleep(wait)
         sendEmail(messager, attachment)
 
