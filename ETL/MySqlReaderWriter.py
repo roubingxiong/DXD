@@ -24,35 +24,8 @@ class BaseReaderWriter():
     def __init__(self, conn): # the config file put in the same location with this script
 
         self.conn = conn
-        self.status = 'In Progress'   # I->In Progress S->Success  F->Fail
         self.charset = conn.get_character_set_info()['name']
-        self.messager = {'status':self.status}
 
-    def refreshETLMessager(self, messager={}):
-        self.messager = messager
-
-        fromDateStr = messager['from_date']
-        location = messager['data_hub']
-        table = messager['table']
-
-        format_date_str = datetime.datetime.strptime(fromDateStr, '%Y-%m-%d').strftime('%Y%m%d')
-
-        dataFileName = table + '.dat.' + format_date_str  # + '.' + nowStr
-        dataFilePathName = os.path.join(location, dataFileName)
-        ctrlFileName = table + '.ctrl.' + format_date_str
-        ctrlFilePathName = os.path.join(location, ctrlFileName)
-        ctrlCnt = 0
-
-        toDateStr = (datetime.datetime.strptime(fromDateStr, '%Y-%m-%d') - datetime.timedelta(days=-1)).strftime('%Y-%m-%d')
-
-        self.messager['data_file'] = dataFileName
-        self.messager['ctrl_file'] = ctrlFileName
-        self.messager['ctrl_count'] = ctrlCnt
-        self.messager['data_path_file'] = dataFilePathName
-        self.messager['ctrl_path_file'] = ctrlFilePathName
-        self.messager['to_date'] = toDateStr
-
-        return self.messager
 
     def getColumnList(self, table):
         logger.info('getting columns from table ddl')
@@ -64,7 +37,7 @@ class BaseReaderWriter():
             cursor.execute(sql)
             for row in cursor.fetchall():
                 colList.append(row[0])
-        except Exception:
+        except:
             raise
         else:
             return colList
@@ -73,27 +46,19 @@ class BaseReaderWriter():
         self.charset = charset
         return self.charset
 
-    def setStatus(self, status='In Progress'):
-        self.status = status
-        self.messager['status'] = self.status
-        return self.status
-
-
 class TableExtractor(BaseReaderWriter):
 
     def __init__(self, conn):
         BaseReaderWriter.__init__(self, conn)
 
     def extractTableToFile(self, messager={}, loadType='INC', delimiter='|'):
-
-        self.refreshETLMessager(messager)
-
         try:
-            ctrlFilePathName = self.messager['ctrl_path_file']
-            dataFilePathName = self.messager['data_path_file']
-            fromDateStr = self.messager['from_date']
-            toDateStr = self.messager['to_date']
-            table = self.messager['table']
+            ctrlFilePathName = messager['ctrl_path_file']
+            dataFilePathName = messager['data_path_file']
+            fromDateStr = messager['from_date']
+            toDateStr = messager['to_date']
+            table = messager['table_name']
+            mode = messager['mode']
             dataFile = codecs.open(dataFilePathName, 'w', self.charset)
             ctrlFile = codecs.open(ctrlFilePathName, 'w', self.charset)
         except:
@@ -130,14 +95,12 @@ class TableExtractor(BaseReaderWriter):
                 dataFile.flush()
 
             logger.info('writing control file->%s',ctrlFilePathName)
-            ctrlFile.writelines([str(ctrlCnt), '\n', table, '\n', fromDateStr, '\n', separator])
+            ctrlFile.writelines([str(ctrlCnt), '\n', table, '\n', fromDateStr + separator + toDateStr, '\n', separator,'\n',mode])
 
-            self.messager['ctrl_count'] = ctrlCnt
-            self.messager['status'] = 'S'
+            messager['ctrl_count'] = ctrlCnt
 
-        except Exception as e:
+        except:
             self.conn.rollback()
-            self.messager['status'] = 'Fail'
             ctrlFile.close()
             dataFile.close()
             os.remove(dataFilePathName)
@@ -145,12 +108,11 @@ class TableExtractor(BaseReaderWriter):
             logger.error('Exception occured, all database operation rollback, data and control file removed')
             raise
         else:
-            self.setStatus('Success')
             logger.info('Congrats! Table extracted successfully!')
         finally:
             logger.info('close database connection')
             self.conn.close()
-            return self.messager
+            return messager
 
 
 
@@ -160,17 +122,15 @@ class TableLoader(BaseReaderWriter):
         BaseReaderWriter.__init__(self, conn)
 
     def loadFileToTable(self, messager,checkCtrlFile='Y'):
-        table = messager['table']
+        table = messager['table_name']
 
-        self.refreshETLMessager(messager)
-
-        ctrlFilePathName = self.messager['ctrl_path_file']
-        dataFilePathName = self.messager['data_path_file']
+        ctrlFilePathName = messager['ctrl_path_file']
+        dataFilePathName = messager['data_path_file']
 
         try:
             dataFile = codecs.open(dataFilePathName, 'r', self.charset)
             ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
-        except Exception as e:
+        except:
             logger.error('failed to open data file(%s) or control file(%s)', dataFilePathName, ctrlFilePathName)
             raise
 
@@ -205,8 +165,8 @@ class TableLoader(BaseReaderWriter):
             logger.info('row count  match control count [%s]', rowCnt)
         else:
             # print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
-            logger.info('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
-            self.setStatus('Fail')
+            logger.error('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
+            raise Exception('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
 
         for index in range(len(colList)):
             if index == 0:
@@ -243,19 +203,15 @@ class TableLoader(BaseReaderWriter):
             messager['ctrl_count'] = rowCnt
             self.conn.commit()
 
-        except Exception as e:
+        except:
             self.conn.rollback()
-            self.setStatus('Fail')
-            # print "-ERROR: errors occurs while inserting records, the transaction roll back, database would not be effected"
             logger.error('errors occurs while loading records, the transaction roll back, database would not be effected')
             raise
         else:
-            self.setStatus('Success')
-            # print "-INFO: Congrats! File loading success"
             logger.info('Congrats! File loading successfully')
         finally:
             ctrlFile.close()
             dataFile.close()
             logger.info('close database connection')
             self.conn.close()
-            return self.messager
+            return messager

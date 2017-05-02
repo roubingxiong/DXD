@@ -17,7 +17,7 @@ global email_count
 email_count = 2
 
 def write_report_email(messager={}, attachment=[]):
-    table = messager['table']
+    table = messager['table_name']
     action = messager['action']
     date = messager['from_date']
     status = messager['status']
@@ -123,6 +123,17 @@ def write_report_email(messager={}, attachment=[]):
 
 def sendJobStatusEmail(messager={}, attachment=[]):
 
+    wait = 10
+    try:
+        sendEmail(messager, attachment)
+    except Exception as e:
+        logger.exception(e.message)
+        logger.warn('exception occured while sending email, resend it in %s seconds', wait)
+        time.sleep(wait)
+        sendEmail(messager, attachment)
+
+def sendEmail(messager={}, attachment=[]):
+    # print messager
     config = messager['config']
     mail_host=config.get('email','host')  #设置服务器
     mail_user=config.get('email','user')    #用户名
@@ -136,6 +147,7 @@ def sendJobStatusEmail(messager={}, attachment=[]):
     message['To'] = receivers
 
     try:
+        logger.info('sending %s email notification', messager['status'])
         smtpObj = smtplib.SMTP()
         # smtpObj.connect(mail_host, 25)    # 端口号 163
         smtpObj.connect(mail_host, 587)    # hotmail
@@ -144,8 +156,10 @@ def sendJobStatusEmail(messager={}, attachment=[]):
         smtpObj.ehlo()
         smtpObj.login(mail_user,mail_pass)
         smtpObj.sendmail(sender, receivers, message.as_string())
-        logger.info('send email successfully')
+
     except smtplib.SMTPException as e:
         logger.exception(e.message)
-        logger.error('Bad luck, failed to send email')
+        logger.info('failed to send %s email notification', messager['status'])
         raise
+    else:
+        logger.info('send email successfully')

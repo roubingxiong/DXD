@@ -15,6 +15,7 @@ logger = logging.getLogger('DXD_ETL')
 conn = sqlite3.connect(dxd_sqlite)
 
 
+
 ddl='''
 CREATE TABLE hist_job_status (
   id integer PRIMARY KEY autoincrement,
@@ -40,7 +41,7 @@ def createHistTable():
     conn.execute(ddl)
     conn.commit()
 
-def recordNewJob(table_name='t_dummy', type='extract', status='Start', run_date='9999-12-31'):
+def addNewRecord(table_name='t_dummy', type='extract', status='Start', run_date='9999-12-31'):
     insert_sql = "insert INTO %s (table_name, type, status, run_date) VALUES ('%s', '%s', '%s', '%s')" % ('hist_job_status',table_name, type, status, run_date)
 
     try:
@@ -60,11 +61,15 @@ def updateDataCtrlFile(id, date_file='dummy.dat', ctrl_file='dummy.ctrl', ctrl_c
 
     try:
         conn.execute(update_sql)
+        time.sleep(100)
         conn.commit()
     except:
         raise
 
     return
+
+def getLastRun(table_name, type):
+    sel_sql = ""
 
 def getDateNdatetime():
     curr_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -73,5 +78,5 @@ def getDateNdatetime():
     return curr_date, curr_datetime
 
 # createHistTable()
-id = recordNewJob()
+id = addNewRecord()
 # updateDataCtrlFile(id=9)
