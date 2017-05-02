@@ -14,7 +14,7 @@ import FileWatcher
 
 from sendEmail import *
 
-from MySqlReaderWriter import TableExtractor, TableLoader
+from mysql_reader_writer import TableExtractor, TableLoader
 
 def main(runDate, runMode, actionType, tblName):
 

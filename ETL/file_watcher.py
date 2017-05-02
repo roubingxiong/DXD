@@ -9,7 +9,7 @@ logger = logging.getLogger('DXD_ETL')
 
 # cntl = "table + '.ctrl.' + runDateStr"
 
-def watch_file(dir, filename, expireTime=20):
+def watch_file(dir, filename, expireTime=180):
     absFile = os.path.join(dir, filename)
     logger.info('start watching file %s', absFile)
     # print "-INFO: start watching file %s"%(absFile)
@@ -42,6 +42,8 @@ def watch_file(dir, filename, expireTime=20):
 
     # print 'file watching run out of time'
     logger.error('%s is not exist, file watching run out of time', absFile)
+    raise Exception(absFile + ' is not exist, file watching run out of ' + expireTime + ' seconds' )
+
     return False
 
 

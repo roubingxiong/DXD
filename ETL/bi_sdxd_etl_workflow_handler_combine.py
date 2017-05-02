@@ -16,7 +16,7 @@ import sqlite
 
 from email_handler import *
 
-from MySqlReaderWriter import TableExtractor, TableLoader
+from mysql_reader_writer import TableExtractor, TableLoader
 
 def main(messager):
 
