@@ -114,7 +114,7 @@ def write_report_email(messager={}, attachment=[]):
             message.attach(att)
             print 'attached ->' + attach
     else:
-        message = MIMEText(mail_msg, 'html', 'utf-8')#MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
+        message = MIMEText(mail_msg, 'html', 'utf-8')
 
     message['Subject'] = subject
 
@@ -135,12 +135,12 @@ def sendJobStatusEmail(messager={}, attachment=[]):
 def sendEmail(messager={}, attachment=[]):
     # print messager
     config = messager['config']
-    mail_host=config.get('email','host')  #设置服务器
-    mail_user=config.get('email','user')    #用户名
-    mail_pass=config.get('email','passwd')   #口令
+    mail_host=config.get('email','host')  
+    mail_user=config.get('email','user')    
+    mail_pass=config.get('email','passwd')   
 
     sender = mail_user
-    receivers = config.get('email','to')#.split(';')#['roubingxiong@163.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    receivers = config.get('email','to')#.split(';')#['roubingxiong@163.com']  
 
     message = write_report_email(messager=messager, attachment=attachment)
     message['From'] = mail_user
@@ -149,7 +149,7 @@ def sendEmail(messager={}, attachment=[]):
     try:
         logger.info('sending %s email notification', messager['status'])
         smtpObj = smtplib.SMTP()
-        # smtpObj.connect(mail_host, 25)    # 端口号 163
+        # smtpObj.connect(mail_host, 25)    
         smtpObj.connect(mail_host, 587)    # hotmail
         smtpObj.ehlo()
         smtpObj.starttls()
