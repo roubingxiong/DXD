@@ -188,12 +188,28 @@ class TableLoader(BaseReaderWriter):
 
         try:
             cursor = self.conn.cursor()
+            step = 1000
             logger.info('cleaning table %s in target database with duplicate id, sql->%s',table, tgt_del_sql)
-            cursor.execute(tgt_del_sql)
+            # cursor.execute(tgt_del_sql)
+            dup_id_count = len(idList)
+            for i in range(0, dup_id_count, step):
+                tgt_del_sql = "delete from %s WHERE id in "%table + str(tuple(idList[i:i+step])).replace('u','')
+
+                if i + step >= dup_id_count:
+                    # print "-INFO: inserting " + str(rowCnt%step) + " rows"
+                    logger.debug('deleting %s duplicate rows', dup_id_count%step)
+                else:
+                    # print "-INFO: inserting " + str(step) + " rows"
+                    logger.debug('deleting %s duplicate rows', step)
+
+                cursor.execute(tgt_del_sql)
+
+
+
             logger.debug("delete %s duplicate rows",cursor.rowcount)
 
             logger.info('loading data into target table')
-            step = 1000
+
             for i in range(0, rowCnt, step):
                 if i + step >= rowCnt:
                     # print "-INFO: inserting " + str(rowCnt%step) + " rows"
