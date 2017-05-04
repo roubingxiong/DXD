@@ -1,21 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import smtplib
-import MySQLdb
-import getopt, sys
 import argparse
-import time,datetime
-import logging
+import datetime
 import logging.config
 
-import ConfigParser
+import MySQLdb
+
 import file_watcher
-import hist_recorder
-
 from email_handler import *
-
 from mysql_reader_writer import TableExtractor, TableLoader
+
 
 def main(messager):
 
@@ -72,7 +67,7 @@ def reload_messager(actionType,runDate, runMode,  tblName, config, logFile, mess
 
     try:
         if runDate == 'None' or runDate.replace(' ', '') == '':
-            runDate = datetime.datetime.today
+            runDate = datetime.datetime.today()
             logger.warn("run date not assigned, using the date of today as the run date")
         else:
             runDate = datetime.datetime.strptime(runDate, '%Y%m%d')
@@ -87,6 +82,7 @@ def reload_messager(actionType,runDate, runMode,  tblName, config, logFile, mess
         from_date = from_date.strftime('%Y-%m-%d')
 
     except:
+
         logger.error("date '%s' is not match the format(yyyymmdd) or a invalid date", runDate)
         raise
     else:
@@ -129,6 +125,9 @@ def get_config(cfg_dir):
 
 
 def get_logger(curr_dir, tblName, runDate, start_time):
+    if runDate in ('None', ''):
+        runDate = datetime.datetime.today().strftime('%Y%m%d')
+
     log_dir = os.path.join(curr_dir, 'log')
     if not os.path.isdir(log_dir):
         print '%s is not exist, now creating it'%log_dir
@@ -181,7 +180,7 @@ if __name__ == "__main__":
     global today_str
     today_str = today.strftime('%Y-%m-%d')
     global curr_dir
-    curr_dir = os.path.dirname(__name__)
+    curr_dir = os.path.dirname(__file__)
 
     global messager
     messager = {'table_name': '', 'action':'','data_hub':'',  'data_file': '', 'ctrl_file': '', 'ctrl_count': '', 'data_path_file': '', 'ctrl_path_file': '', 'status': 'Start', 'from_date': '9999-12-31', 'to_date': '9999-12-31','log':'log'}
@@ -200,7 +199,7 @@ if __name__ == "__main__":
     actionType = str(args.a)
     tblName = str(args.t)
 
-    parser.print_help()
+    # parser.print_help()
 
     global logger
     logger, logger_file = get_logger(curr_dir, tblName, runDate, start_time)
@@ -214,8 +213,8 @@ if __name__ == "__main__":
         messager = reload_messager(actionType, runDate, runMode, tblName,config, logger_file, messager)
         messager['status'] = 'Start'
 
-        sendJobStatusEmail(messager=messager)
-        config = messager['config']
+        # sendJobStatusEmail(messager=messager)
+        # config = messager['config']
 
         messager = main(messager)
     except Exception as e:
@@ -234,4 +233,4 @@ if __name__ == "__main__":
         log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
     finally:
         logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        sendJobStatusEmail(messager=messager, attachment=[logger_file])
+        # sendJobStatusEmail(messager=messager, attachment=[logger_file])

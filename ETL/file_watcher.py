@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import os, sys, time
@@ -9,7 +9,7 @@ logger = logging.getLogger('DXD_ETL')
 
 # cntl = "table + '.ctrl.' + runDateStr"
 
-def watch_file(dir, filename, expireTime=180):
+def watch_file(dir, filename, expireTime=10):
     absFile = os.path.join(dir, filename)
     logger.info('start watching file %s', absFile)
     # print "-INFO: start watching file %s"%(absFile)
@@ -41,8 +41,8 @@ def watch_file(dir, filename, expireTime=180):
         time.sleep(freq)
 
     # print 'file watching run out of time'
-    logger.error('%s is not exist, file watching run out of time', absFile)
-    raise Exception(absFile + ' is not exist, file watching run out of ' + expireTime + ' seconds' )
+    logger.error('%s is not exist, file watching run out of %s seconds', absFile, expireTime)
+    raise Exception(absFile + ' is not exist, file watching run out of ' + str(expireTime) + ' seconds' )
 
     return False
 

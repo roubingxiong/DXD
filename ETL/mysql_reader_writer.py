@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 __author__ = 'zhxiong'
 import MySQLdb # this is a third party module, you can find from internet and install it
@@ -59,8 +59,10 @@ class TableExtractor(BaseReaderWriter):
             toDateStr = messager['to_date']
             table = messager['table_name']
             mode = messager['mode']
-            dataFile = codecs.open(dataFilePathName, 'w', self.charset)
-            ctrlFile = codecs.open(ctrlFilePathName, 'w', self.charset)
+            open(dataFilePathName, 'w+')
+
+            dataFile = codecs.open(dataFilePathName, 'w+', self.charset)
+            ctrlFile = codecs.open(ctrlFilePathName, 'w+', self.charset)
         except:
             raise
 
@@ -68,6 +70,7 @@ class TableExtractor(BaseReaderWriter):
         colStr = '' #used in sql
         header = '' #used in data file
         separator = delimiter
+        linesep = os.linesep
         for index in range(len(colList)):
             if index == 0:
                 colStr = colList[index]
@@ -89,13 +92,14 @@ class TableExtractor(BaseReaderWriter):
             logger.debug('%s rows return', ctrlCnt)
 
             logger.info('writing records to data file->%s',dataFilePathName)
-            dataFile.write(header + '\n')
+            dataFile.write(header + linesep)
+
             for row in cursor.fetchall():
-                dataFile.write(row[0] + '\n')
+                dataFile.write(row[0] + linesep)
                 dataFile.flush()
 
             logger.info('writing control file->%s',ctrlFilePathName)
-            ctrlFile.writelines([str(ctrlCnt), '\n', table, '\n', fromDateStr + separator + toDateStr, '\n', separator,'\n',mode])
+            ctrlFile.writelines([str(ctrlCnt), linesep, table, linesep, fromDateStr + separator + toDateStr, linesep, separator,linesep,mode])
 
             messager['ctrl_count'] = ctrlCnt
 
@@ -105,7 +109,7 @@ class TableExtractor(BaseReaderWriter):
             dataFile.close()
             os.remove(dataFilePathName)
             os.remove(ctrlFilePathName)
-            logger.error('Exception occured, all database operation rollback, data and control file removed')
+            logger.exception('Exception occured, all database operation rollback, data and control file removed')
             raise
         else:
             logger.info('Congrats! Table extracted successfully!')
@@ -136,36 +140,44 @@ class TableLoader(BaseReaderWriter):
 
         logger.info('reading control file->%s', ctrlFilePathName)
         ctrlInfo = ctrlFile.readlines()
-        ctrlCnt = ctrlInfo[0]
-        ctrlTable = ctrlInfo[1]
-        ctrlDate = ctrlInfo[2]
-        ctrlSeparator = str(ctrlInfo[3]).strip(' ')
-        mode = ctrlInfo[4]
+        ctrlCnt = str(ctrlInfo[0]).replace('\n','').replace('\r','')
+        ctrlTable = str(ctrlInfo[1]).replace('\n','').replace('\r','')
+        ctrlDate = str(ctrlInfo[2]).replace('\n','').replace('\r','')
+        ctrlSeparator = str(ctrlInfo[3]).replace('\n','').replace('\r','')
+        mode = str(ctrlInfo[4]).replace('\n','').replace('\r','')
         logger.info('Information from control file\n\tcount:%s\tsource table:%s\tdate:%s\tdelimiter:%s\tmode:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator,mode)
 
         logger.info('reading data file->%s', dataFilePathName)
         recordList = []
         colStr = ''
         colPos = ''
-        colList = dataFile.readline().split('|')
+        header = dataFile.readline()
+        colList = header.split(ctrlSeparator)
 
-        logger.debug(colList)
+        logger.debug('column list in data file->%s', colList)
 
         id_index = colList.index('id')  # got index of the field called "id"
+        logger.debug('id_index->%s', id_index)
         idList = []
 
+        # dataFile.seek(0,2)
         for row in dataFile.readlines():
-            row_list = row.split('|')
+            # logger.info('first row->%s',row)
+            # exit()
+            row_list = row.split(ctrlSeparator)
+            #print row_list
             idList.append(row_list[id_index])
             recordList.append(row_list)
 
+        # exit()
         logger.debug('id list->%s', idList)
 
         logger.info('control file validation')
         rowCnt = len(recordList)
+
         if int(rowCnt) == int(ctrlCnt):
             # print "-INFO: row count  match control count [%s]"% rowCnt
-            logger.info('row count  match control count [%s]', rowCnt)
+            logger.info('row count  match control count [%s]', ctrlCnt)
         else:
             # print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
             logger.error('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
@@ -206,7 +218,7 @@ class TableLoader(BaseReaderWriter):
 
 
 
-            logger.debug("delete %s duplicate rows",cursor.rowcount)
+            logger.debug("delete %s duplicate rows",dup_id_count)
 
             logger.info('loading data into target table')
 
@@ -218,13 +230,15 @@ class TableLoader(BaseReaderWriter):
                     # print "-INFO: inserting " + str(step) + " rows"
                     logger.debug('inserting %s rows', step)
 
-                cursor.executemany(tgt_ins_sql, recordList[i:i+step])
+                bulk_record = recordList[i:i+step]
+
+                cursor.executemany(tgt_ins_sql, bulk_record)
             messager['ctrl_count'] = rowCnt
             self.conn.commit()
-
+            logger.info('changes committed')
         except:
             self.conn.rollback()
-            logger.error('errors occurs while loading records, the transaction roll back, database would not be effected')
+            logger.exception('errors occurs while loading records, the transaction roll back, database would not be effected')
             raise
         else:
             logger.info('Congrats! File loading successfully')
