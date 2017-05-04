@@ -116,7 +116,6 @@ class TableExtractor(BaseReaderWriter):
             return messager
 
 
-
 class TableLoader(BaseReaderWriter):
 
     def __init__(self, conn):
@@ -198,9 +197,11 @@ class TableLoader(BaseReaderWriter):
             logger.info('deleting duplicate from target table %s', table)
             del_id_total = 0
             for i in range(0, len(id_list), step):
-                tgt_del_sql = "delete from %s WHERE id in "%table + str(tuple(id_list[i:i+step]))
+                bulk_id = str(tuple(id_list[i:i+step]))
+                tgt_del_sql = "delete from %s WHERE id in %s" % (table, bulk_id)
 
                 cursor.execute(tgt_del_sql)
+
                 del_row_count = cursor.rowcount
                 logger.debug('deleting %s rows', del_row_count)
                 del_id_total = del_id_total + cursor.rowcount
@@ -212,12 +213,13 @@ class TableLoader(BaseReaderWriter):
             logger.debug("total [%s] duplicate rows deleted", del_id_total)
 
             logger.info('inserting new record into target table %s', table)
-            tgt_ins_sql = "INSERT INTO " + table + " (" + col_str + ") values (" + col_position + ") "
+            tgt_ins_sql = "INSERT INTO %s (%s) values (%s) " % (table, col_str, col_position)
             ins_id_total = 0
             for i in range(0, rowCnt, step):
                 bulk_record = record_list[i:i+step]
 
                 cursor.executemany(tgt_ins_sql, bulk_record)
+
                 ins_row_count = cursor.rowcount
                 logger.debug('inserting %s rows', ins_row_count)
                 ins_id_total = ins_id_total + ins_row_count
