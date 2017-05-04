@@ -1,3 +1,2 @@
 # -*- coding: UTF-8 -*-
-#!/usr/bin/python
-
+#!/usr/bin/env python2
