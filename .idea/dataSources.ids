@@ -158,7 +158,2846 @@
     </database-model>
   </data-source>
   <data-source name="bi_sdxd@rm-bp1a224o5dj0p5g1e.mysql.rds.aliyuncs.com" uuid="7ccd857f-9cdb-4eb2-9a70-537e90349bab">
-    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+    <database-info product="MySQL" version="5.5.5-10.1.13-MariaDB" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.35 ( Revision: 5fb9c5849535c13917c2cf9baaece6ef9693ef27 )">
+      <extra-name-characters>#@</extra-name-characters>
+      <identifier-quote-string>`</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="lower" quoted-identifiers="lower"/>
+    <database-model serializer="dbm" rdbms="MYSQL" format-version="2.4">
+      <schema id="1" name="bi_sdxd"/>
+      <table id="2" parent="1" name="src_order"/>
+      <table id="3" parent="1" name="t_apply_admittance">
+        <comment>准入申请表</comment>
+      </table>
+      <table id="4" parent="1" name="t_apply_money">
+        <comment>贷款申请表</comment>
+      </table>
+      <table id="5" parent="1" name="t_apply_rollover">
+        <comment>产品续借表</comment>
+      </table>
+      <table id="6" parent="1" name="t_approve_application">
+        <comment>信审申请表</comment>
+      </table>
+      <table id="7" parent="1" name="t_approve_application_reject">
+        <comment>准入拒绝码X表</comment>
+      </table>
+      <table id="8" parent="1" name="t_credit_line">
+        <comment>用户信用额度</comment>
+      </table>
+      <table id="9" parent="1" name="t_credit_line_history">
+        <comment>用户信用额度变化历史表</comment>
+      </table>
+      <table id="10" parent="1" name="t_decision_application">
+        <comment>风控决策任务表</comment>
+      </table>
+      <table id="11" parent="1" name="t_decision_rule">
+        <comment>规则定义表</comment>
+      </table>
+      <table id="12" parent="1" name="t_decision_rule_log"/>
+      <table id="13" parent="1" name="t_loan">
+        <comment>放款表</comment>
+      </table>
+      <table id="14" parent="1" name="t_repayment_plan">
+        <comment>还款计划</comment>
+      </table>
+      <table id="15" parent="1" name="t_user">
+        <comment>用户基本信息表</comment>
+      </table>
+      <table id="16" parent="1" name="t_user_bank_card">
+        <comment>用户绑定的银行卡</comment>
+      </table>
+      <table id="17" parent="1" name="t_user_device_active">
+        <comment>设备激活时间</comment>
+      </table>
+      <table id="18" parent="1" name="t_user_login">
+        <comment>用户登录历史</comment>
+      </table>
+      <table id="19" parent="1" name="t_user_profile_base">
+        <comment>用户基本信息</comment>
+      </table>
+      <table id="20" parent="1" name="t_user_profile_contact">
+        <comment>联系人信息：必须有1个家属</comment>
+      </table>
+      <table id="21" parent="1" name="t_user_profile_face_recognition">
+        <comment>人脸识别</comment>
+      </table>
+      <table id="22" parent="1" name="t_user_profile_home">
+        <comment>用户家庭地址</comment>
+      </table>
+      <table id="23" parent="1" name="t_user_profile_identity">
+        <comment>用户实名认证</comment>
+      </table>
+      <table id="24" parent="1" name="t_user_profile_job">
+        <comment>用户工作信息</comment>
+      </table>
+      <table id="25" parent="1" name="t_user_profile_phone_identity">
+        <comment>手机认证</comment>
+      </table>
+      <table id="26" parent="1" name="t_user_reginfo">
+        <comment>用户注册时的相关信息</comment>
+      </table>
+      <table id="27" parent="1" name="t_user_zhima">
+        <comment>芝麻信息</comment>
+      </table>
+      <column id="28" parent="2" name="order_num">
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="29" parent="2" name="product_num">
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+      </column>
+      <column id="30" parent="2" name="product_price">
+        <mandatory>1</mandatory>
+        <data-type>decimal(11)</data-type>
+      </column>
+      <column id="31" parent="2" name="order_date">
+        <mandatory>1</mandatory>
+        <data-type>date</data-type>
+      </column>
+      <column id="32" parent="3" name="id">
+        <comment>唯一标识：code+-+YYMMDDHH+sequence
+唯一标识：code+-+YYMMDDHH+sequence</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="33" parent="3" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(32)</data-type>
+      </column>
+      <column id="34" parent="3" name="user_name">
+        <comment>用户姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="35" parent="3" name="phone">
+        <comment>手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="36" parent="3" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="37" parent="3" name="product_id">
+        <comment>产品ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="38" parent="3" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="39" parent="3" name="amount">
+        <comment>金额（元）</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="40" parent="3" name="period">
+        <comment>期限（月）</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="41" parent="3" name="total_charge">
+        <comment>总的费用（利息+服务费</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="42" parent="3" name="status">
+        <comment>状态：0-提出申请 1-准入规则运行中 19-准入规则运行完成 21-拒绝准入 29-允许准入</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="43" parent="3" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="44" parent="3" name="decision_time">
+        <comment>准入规则运行完成时间
+准入规则运行完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="45" parent="3" name="approved_time">
+        <comment>信审完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="46" parent="3" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="47" parent="3" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="48" parent="3" name="IDX_PHONE">
+        <columns>phone</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="49" parent="3" name="IDX_UNIQUE_USER_ID">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="50" parent="3" name="IDX_UNIQUE_USER_ID">
+        <columns>user_id</columns>
+        <underlying-index>IDX_UNIQUE_USER_ID</underlying-index>
+      </key>
+      <key id="51" parent="3" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="52" parent="4" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="53" parent="4" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="54" parent="4" name="user_name">
+        <comment>用户姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="55" parent="4" name="phone">
+        <comment>手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="56" parent="4" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="57" parent="4" name="product_id">
+        <comment>产品ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="58" parent="4" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="59" parent="4" name="period">
+        <comment>借款期限：如7天，14天</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="60" parent="4" name="capital">
+        <comment>放款本金（元），如1090</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="61" parent="4" name="service_charge">
+        <comment>服务费（元），如90</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="62" parent="4" name="amount">
+        <comment>实际到手金额（元），如1000</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="63" parent="4" name="repay_amount">
+        <comment>到期应还金额（元），如1100</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="64" parent="4" name="bank_card_pk">
+        <comment>用户绑定的银行卡数据主键ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="65" parent="4" name="bank_code">
+        <comment>银行简称（CCB）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="66" parent="4" name="bank_name">
+        <comment>银行简称，如招商银行</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="67" parent="4" name="card_no">
+        <comment>银行卡号</comment>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="68" parent="4" name="decision_time">
+        <comment>支用规则运行完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="69" parent="4" name="max_rollover_times">
+        <comment>最大续借续借次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="70" parent="4" name="rollover_times">
+        <comment>续借次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="71" parent="4" name="rollover_status">
+        <comment>续借状态：0-申请续借 1-续借中    8-续借失败  9-续借成功</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="72" parent="4" name="status">
+        <comment>状态：0-提出申请 11-未通过支用规则 19-通过支用规则 21-放款失败 22-放款拒绝 29-放款成功 31-已逾期 89-还款成功 99-已清算</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="73" parent="4" name="contract_id">
+        <comment>合同ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="74" parent="4" name="thirdparty_contract_id">
+        <comment>三方协议ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="75" parent="4" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="76" parent="4" name="loan_time">
+        <comment>放款时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="77" parent="4" name="rollover_time">
+        <comment>最近一次续借成功时间</comment>
+        <data-type>datetime</data-type>
+      </column>
+      <column id="78" parent="4" name="should_repay_time">
+        <comment>正常到期还款时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="79" parent="4" name="repayment_time">
+        <comment>实际还款时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="80" parent="4" name="user_ip">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="81" parent="4" name="reject_cause">
+        <comment>放款拒绝原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="82" parent="4" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="83" parent="4" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="84" parent="4" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="85" parent="4" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="86" parent="4" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="87" parent="5" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="88" parent="5" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="89" parent="5" name="apply_id">
+        <comment>申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="90" parent="5" name="old_product_id">
+        <comment>续借前的产品ID，保留历史记录啊</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="91" parent="5" name="old_period">
+        <comment>续借前的产品期限：如14天</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="92" parent="5" name="old_capital">
+        <comment>续借前的放款本金（元），如1090</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="93" parent="5" name="old_amount">
+        <comment>续借前的实际到手金额（元），如1000</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="94" parent="5" name="product_id">
+        <comment>本次续借的产品ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="95" parent="5" name="period">
+        <comment>续借期限：如7天，14天</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="96" parent="5" name="capital">
+        <comment>续借的放款本金（元），如1090</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="97" parent="5" name="amount">
+        <comment>续借的实际到手金额（元），如1000</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="98" parent="5" name="rollover_charge">
+        <comment>展期费用</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="99" parent="5" name="status">
+        <comment>状态：0-申请续借 1-续借中    8-续借失败  9-续借成功</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="100" parent="5" name="bank_code">
+        <comment>银行简称（CCB）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="101" parent="5" name="bank_name">
+        <comment>银行简称，如招商银行</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="102" parent="5" name="card_no">
+        <comment>银行卡号</comment>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="103" parent="5" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="104" parent="5" name="rollover_time">
+        <comment>展期完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="105" parent="5" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="106" parent="5" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="107" parent="5" name="idx_applyid">
+        <columns>apply_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="108" parent="5" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="109" parent="5" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="110" parent="5" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="111" parent="6" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="112" parent="6" name="admittance_id">
+        <comment>准入申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="113" parent="6" name="user_name">
+        <comment>用户手机号</comment>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="114" parent="6" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="115" parent="6" name="phone">
+        <comment>用户手机号</comment>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="116" parent="6" name="city">
+        <comment>用户注册时所在城市</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="117" parent="6" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="118" parent="6" name="product_id">
+        <comment>产品ID
+触发事件源ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="119" parent="6" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="120" parent="6" name="product_name">
+        <comment>产品名称</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="121" parent="6" name="amount">
+        <comment>金额（元</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="122" parent="6" name="period">
+        <comment>期限（天）</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="123" parent="6" name="apply_time">
+        <comment>申请时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="124" parent="6" name="decision_result">
+        <comment>决策结果</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="125" parent="6" name="assignee_id">
+        <comment>被分配的信审员ID</comment>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="126" parent="6" name="assignee_name">
+        <comment>被分配的信审员姓名</comment>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="127" parent="6" name="leader_id">
+        <comment>终审人员id</comment>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="128" parent="6" name="leader_name">
+        <comment>终审人员</comment>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="129" parent="6" name="manager_id">
+        <comment>分配任务的管理员id</comment>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="130" parent="6" name="manager_name">
+        <comment>分配任务的管理员姓名</comment>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="131" parent="6" name="reject_code">
+        <comment>拒绝码</comment>
+        <data-type>varchar(15)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="132" parent="6" name="status">
+        <comment>信审状态：0-待分配 1-待初审 2-初审通过 3-初审拒绝 4-暂存 17-终审退回 18-结案拒绝 19-结案通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="133" parent="6" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="134" parent="6" name="decision_time">
+        <comment>决策完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="135" parent="6" name="first_approve_time">
+        <comment>初审时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="136" parent="6" name="final_approve_time">
+        <comment>终审时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="137" parent="6" name="assign_time">
+        <comment>分配时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="138" parent="6" name="update_time">
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="139" parent="6" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="140" parent="6" name="auto_tag">
+        <comment>1:自动拒绝,0:人工审核</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="141" parent="6" name="idx_admint">
+        <columns>admittance_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="142" parent="6" name="idx_final">
+        <columns>final_approve_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="143" parent="6" name="idx_name">
+        <columns>user_name</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="144" parent="6" name="idx_phone">
+        <columns>phone</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="145" parent="6" name="IDX_STATUS">
+        <columns>status</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="146" parent="6" name="idx_time">
+        <columns>apply_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="147" parent="6" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="148" parent="6" name="idx_admint">
+        <columns>admittance_id</columns>
+        <underlying-index>idx_admint</underlying-index>
+      </key>
+      <key id="149" parent="6" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="150" parent="7" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="151" parent="7" name="admittance_id">
+        <comment>准入申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="152" parent="7" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="153" parent="7" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="154" parent="7" name="product_id">
+        <comment>产品ID
+触发事件源ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="155" parent="7" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="156" parent="7" name="apply_time">
+        <comment>申请时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="157" parent="7" name="decision_result">
+        <comment>决策结果</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="158" parent="7" name="reject_code">
+        <comment>拒绝码</comment>
+        <data-type>varchar(15)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="159" parent="7" name="operator_id">
+        <comment>操作人id</comment>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="160" parent="7" name="status">
+        <comment>信审状态：0-待分配 1-待初审 2-初审通过 3-初审拒绝 4-暂存 17-终审退回 18-结案拒绝 19-结案通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="161" parent="7" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="162" parent="7" name="decision_time">
+        <comment>决策完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="163" parent="7" name="final_approve_time">
+        <comment>终审时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="164" parent="7" name="update_time">
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="165" parent="7" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="166" parent="7" name="idx_admint">
+        <columns>admittance_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="167" parent="7" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="168" parent="7" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="169" parent="7" name="idx_admint">
+        <columns>admittance_id</columns>
+        <underlying-index>idx_admint</underlying-index>
+      </key>
+      <key id="170" parent="7" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="171" parent="8" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="172" parent="8" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="173" parent="8" name="total">
+        <comment>额度总额</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="174" parent="8" name="used">
+        <comment>用掉的额度</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="175" parent="8" name="frozen">
+        <comment>被冻结的额度</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="176" parent="8" name="status">
+        <comment>状态：0-创建 1-初始化  2-决策运行结束（处理中） 3-审批拒绝 4-拒绝 9-激活（可用）
+</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="177" parent="8" name="approved_time">
+        <comment>额度通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="178" parent="8" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="179" parent="8" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="180" parent="8" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="181" parent="8" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="182" parent="8" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="183" parent="8" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="184" parent="8" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="185" parent="9" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="186" parent="9" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="187" parent="9" name="event_source">
+        <comment>触发事件源的ID，如申请贷款ID，信审员ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="188" parent="9" name="event_type">
+        <comment>操作事件类型：冻结，解冻，占用，提额，降额
+操作事件类型：冻结，解冻，占用，提额，降额
+操作事件类型:冻结，解冻，占用，提额，降额</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="189" parent="9" name="amount">
+        <comment>额度变更值</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="190" parent="9" name="total_amount">
+        <comment>当前可用额度</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="191" parent="9" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="192" parent="9" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="193" parent="9" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="194" parent="9" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="195" parent="9" name="idx_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="196" parent="9" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="197" parent="10" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="198" parent="10" name="event_type">
+        <comment>任务类型：准入，支用</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(15)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="199" parent="10" name="source_id">
+        <comment>准入申请ID或者贷款申请ID
+准入申请ID或者贷款申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="200" parent="10" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="201" parent="10" name="newbie">
+        <comment>0-新户 1-旧户</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="202" parent="10" name="product_id">
+        <comment>产品ID
+触发事件源ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="203" parent="10" name="apply_time">
+        <comment>申请时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="204" parent="10" name="decision_task_id">
+        <comment>决策任务的ID（每次运行分配一个ID）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="205" parent="10" name="decision_result">
+        <comment>决策结果</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="206" parent="10" name="reject_code">
+        <comment>拒绝码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(15)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="207" parent="10" name="status">
+        <comment>0-未处理 1-处理中 9-已处理</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="208" parent="10" name="create_time">
+        <comment>创建时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="209" parent="10" name="decision_time">
+        <comment>决策完成时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="210" parent="10" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="211" parent="10" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="212" parent="10" name="IDX_DECISION_TASK_ID">
+        <columns>decision_task_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="213" parent="10" name="idx_object">
+        <columns>source_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="214" parent="10" name="idx_task_id">
+        <columns>decision_task_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="215" parent="10" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="216" parent="10" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="217" parent="10" name="idx_object">
+        <columns>source_id</columns>
+        <underlying-index>idx_object</underlying-index>
+      </key>
+      <key id="218" parent="10" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="219" parent="11" name="ID">
+        <comment>主键</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="220" parent="11" name="create_time">
+        <comment>数据创建时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="221" parent="11" name="update_time">
+        <comment>数据更新时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="222" parent="11" name="name">
+        <comment>名称</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="223" parent="11" name="code">
+        <comment>代码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(100)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="224" parent="11" name="remark">
+        <comment>备注</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+      </column>
+      <column id="225" parent="11" name="input_params">
+        <comment>输入参数,与元数据关联,如有多个以逗号分割</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(500)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="226" parent="11" name="script_context">
+        <comment>规则脚本</comment>
+        <data-type>text</data-type>
+      </column>
+      <column id="227" parent="11" name="version">
+        <comment>规则版本</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="228" parent="11" name="status">
+        <comment>状态 &#xd;
+            0:初始化 1 测试 2 启用3 停止&#xd;
+</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="229" parent="11" name="resp_type">
+        <comment>规则输出结果类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <index id="230" parent="11" name="idx_code">
+        <columns>code</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="231" parent="11" name="idx_version">
+        <columns>version</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="232" parent="11" name="PRIMARY">
+        <columns>ID</columns>
+        <primary>1</primary>
+      </key>
+      <column id="233" parent="12" name="ID">
+        <comment>主键</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="234" parent="12" name="create_time">
+        <comment>数据创建时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="235" parent="12" name="update_time">
+        <comment>数据更新时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="236" parent="12" name="task_no">
+        <comment>任务编号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+      </column>
+      <column id="237" parent="12" name="rule_code">
+        <comment>规则代码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(100)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="238" parent="12" name="rule_version">
+        <comment>规则版本</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="239" parent="12" name="params">
+        <comment>代码</comment>
+        <mandatory>1</mandatory>
+        <data-type>longtext</data-type>
+      </column>
+      <column id="240" parent="12" name="result">
+        <comment>备注</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(500)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="241" parent="12" name="detail">
+        <mandatory>1</mandatory>
+        <data-type>varchar(4000)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="242" parent="12" name="status">
+        <comment>规则运行状态</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+      </column>
+      <index id="243" parent="12" name="idx_result">
+        <columns>result</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="244" parent="12" name="index_rule_code">
+        <columns>rule_code</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="245" parent="12" name="index_taskno">
+        <columns>task_no</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="246" parent="12" name="index_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="247" parent="12" name="PRIMARY">
+        <columns>ID</columns>
+        <primary>1</primary>
+      </key>
+      <column id="248" parent="13" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="249" parent="13" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="250" parent="13" name="user_name">
+        <comment>姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="251" parent="13" name="apply_id">
+        <comment>申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="252" parent="13" name="trade_no">
+        <comment>支付流水号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="253" parent="13" name="product_id">
+        <comment>产品ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="254" parent="13" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="255" parent="13" name="capital">
+        <comment>放款本金</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="256" parent="13" name="amount">
+        <comment>实际到手金额</comment>
+        <mandatory>1</mandatory>
+        <data-type>int(11)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="257" parent="13" name="period">
+        <comment>期限（天）</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="258" parent="13" name="bank_card_pk">
+        <comment>用户绑定的银行卡数据主键ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="259" parent="13" name="bank_code">
+        <comment>银行简称，如CCB，ICBC</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="260" parent="13" name="bank_name">
+        <comment>银行简称，如招商银行</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(50)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="261" parent="13" name="card_no">
+        <comment>银行卡号</comment>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="262" parent="13" name="channel_code">
+        <comment>渠道编号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="263" parent="13" name="capital_provider_id">
+        <comment>资金提供方ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="264" parent="13" name="status">
+        <comment>状态：0-待放款  12-放款中  21-放款失败 22-放款拒绝 23-放款异常 29-放款成功</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="265" parent="13" name="retrys">
+        <comment>失败重试次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="266" parent="13" name="cause">
+        <comment>失败原因或者异常原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="267" parent="13" name="remarks">
+        <comment>备注</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="268" parent="13" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="269" parent="13" name="approve_time">
+        <comment>信审通过时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="270" parent="13" name="start_loan_time">
+        <comment>开始放款的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="271" parent="13" name="end_loan_time">
+        <comment>收到放款结果（成功或失败）时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="272" parent="13" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="273" parent="13" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="274" parent="13" name="idx_apply_id">
+        <columns>apply_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="275" parent="13" name="idx_name">
+        <columns>user_name</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="276" parent="13" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="277" parent="13" name="idx_time1">
+        <columns>start_loan_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="278" parent="13" name="idx_time2">
+        <columns>end_loan_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="279" parent="13" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="280" parent="13" name="idx_apply_id">
+        <columns>apply_id</columns>
+        <underlying-index>idx_apply_id</underlying-index>
+      </key>
+      <key id="281" parent="13" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="282" parent="14" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="283" parent="14" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="284" parent="14" name="user_name">
+        <comment>姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="285" parent="14" name="phone">
+        <comment>手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="286" parent="14" name="loan_times">
+        <comment>借款次数</comment>
+        <data-type>int(10)</data-type>
+        <default-expression>&apos;1&apos;</default-expression>
+      </column>
+      <column id="287" parent="14" name="apply_id">
+        <comment>申请ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="288" parent="14" name="loan_id">
+        <comment>放款ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="289" parent="14" name="product_id">
+        <comment>产品ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="290" parent="14" name="product_category">
+        <comment>产品类型</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="291" parent="14" name="capital">
+        <comment>应还本金</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="292" parent="14" name="actual_capital">
+        <comment>已还本金</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="293" parent="14" name="amount">
+        <comment>正常还款（不逾期）的应还款金额</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="294" parent="14" name="actual_amount">
+        <comment>实际还款金额</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(11,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="295" parent="14" name="capital_provider_id">
+        <comment>资金提供方ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="296" parent="14" name="overdue_status">
+        <comment>0-未逾期  1-已逾期</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="297" parent="14" name="status">
+        <comment>30-待还款 88-代偿还款成功 89-还款成功</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(3)</data-type>
+        <default-expression>&apos;30&apos;</default-expression>
+      </column>
+      <column id="298" parent="14" name="create_time">
+        <comment>创建时间（申请时间）</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="299" parent="14" name="loan_time">
+        <comment>放款时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="300" parent="14" name="period">
+        <comment>借款期限：如7天，14天</comment>
+        <data-type>smallint(6)</data-type>
+      </column>
+      <column id="301" parent="14" name="rollover_time">
+        <comment>展期完成时间</comment>
+        <data-type>datetime</data-type>
+      </column>
+      <column id="302" parent="14" name="repayment_time">
+        <comment>到期还款时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="303" parent="14" name="actual_repayment_time">
+        <comment>实际还款成功时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="304" parent="14" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="305" parent="14" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="306" parent="14" name="idx_apply_id">
+        <columns>apply_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="307" parent="14" name="idx_loan">
+        <columns>loan_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="308" parent="14" name="idx_time">
+        <columns>loan_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="309" parent="14" name="idx_time1">
+        <columns>repayment_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="310" parent="14" name="idx_user">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="311" parent="14" name="idx_apply_id">
+        <columns>apply_id</columns>
+        <underlying-index>idx_apply_id</underlying-index>
+      </key>
+      <key id="312" parent="14" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="313" parent="15" name="id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="314" parent="15" name="phone">
+        <comment>手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="315" parent="15" name="password">
+        <comment>密码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="316" parent="15" name="salt">
+        <comment>盐</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+      </column>
+      <column id="317" parent="15" name="status">
+        <comment>状态：1-正常 10-锁定</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;1&apos;</default-expression>
+      </column>
+      <column id="318" parent="15" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="319" parent="15" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="320" parent="15" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="321" parent="15" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="322" parent="15" name="unq_phone">
+        <columns>phone</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="323" parent="15" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="324" parent="15" name="unq_phone">
+        <columns>phone</columns>
+        <underlying-index>unq_phone</underlying-index>
+      </key>
+      <column id="325" parent="16" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="326" parent="16" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="327" parent="16" name="bank_name">
+        <comment>银行：CCB等</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="328" parent="16" name="short_name">
+        <mandatory>1</mandatory>
+        <data-type>varchar(16)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="329" parent="16" name="card_type">
+        <mandatory>1</mandatory>
+        <data-type>varchar(16)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="330" parent="16" name="card_no">
+        <comment>银行卡号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="331" parent="16" name="reserved_phone">
+        <comment>预留手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="332" parent="16" name="status">
+        <comment>0-不可用 1-可用</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;1&apos;</default-expression>
+      </column>
+      <column id="333" parent="16" name="latest_used_time">
+        <comment>最近一次使用时间
+</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="334" parent="16" name="contact_id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="335" parent="16" name="bind_status">
+        <mandatory>1</mandatory>
+        <data-type>varchar(16)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="336" parent="16" name="create_time">
+        <comment>创建时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="337" parent="16" name="update_time">
+        <comment>更新时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="338" parent="16" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="339" parent="16" name="idx_time">
+        <columns>latest_used_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="340" parent="16" name="idx_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="341" parent="16" name="unx_cardno">
+        <columns>card_no</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="342" parent="16" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="343" parent="16" name="unx_cardno">
+        <columns>card_no</columns>
+        <underlying-index>unx_cardno</underlying-index>
+      </key>
+      <column id="344" parent="17" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="345" parent="17" name="device_id">
+        <comment>手机的设备ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="346" parent="17" name="active_time">
+        <comment>设备激活时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+      </column>
+      <column id="347" parent="17" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="348" parent="17" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <index id="349" parent="17" name="idx_device_id">
+        <columns>device_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="350" parent="17" name="idx_device_id">
+        <columns>device_id</columns>
+        <underlying-index>idx_device_id</underlying-index>
+      </key>
+      <key id="351" parent="17" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="352" parent="18" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="353" parent="18" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="354" parent="18" name="channel">
+        <comment>登录渠道：app/h5/web</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(5)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="355" parent="18" name="page">
+        <comment>页面id，标识通过哪个注册页面登录的</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+      </column>
+      <column id="356" parent="18" name="ip">
+        <comment>登录的IP</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="357" parent="18" name="mac">
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="358" parent="18" name="provice">
+        <comment>省份</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="359" parent="18" name="city">
+        <comment>城市</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(255)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="360" parent="18" name="address">
+        <comment>登录的详细地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="361" parent="18" name="longitude">
+        <comment>经度</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(5,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="362" parent="18" name="latitude">
+        <comment>纬度</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(5,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="363" parent="18" name="browser">
+        <comment>浏览器类型（如果是通过网页注册）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="364" parent="18" name="device_id">
+        <comment>手机的设备ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="365" parent="18" name="device_model">
+        <comment>注册时的手机型号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="366" parent="18" name="device_os_version">
+        <comment>设备操作系统版本</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+      </column>
+      <column id="367" parent="18" name="login_time">
+        <comment>登录时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="368" parent="18" name="app_name">
+        <comment>APP名称</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="369" parent="18" name="app_version">
+        <comment>APP版本号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="370" parent="18" name="api_version">
+        <comment>API版本号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="371" parent="18" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="372" parent="18" name="update_time">
+        <comment>更新时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="373" parent="18" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="374" parent="18" name="IDX_DEVICE_ID">
+        <columns>device_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="375" parent="18" name="idx_time">
+        <columns>login_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="376" parent="18" name="idx_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="377" parent="18" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="378" parent="19" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="379" parent="19" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(32)</data-type>
+      </column>
+      <column id="380" parent="19" name="marriage">
+        <comment>婚姻状态：已婚／未婚</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(2)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="381" parent="19" name="education">
+        <comment>学历：大专，本科，硕士，博士等</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(5)</data-type>
+      </column>
+      <column id="382" parent="19" name="wechat">
+        <comment>微信账号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="383" parent="19" name="email">
+        <comment>邮箱</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="384" parent="19" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="385" parent="19" name="update_time">
+        <comment>更新时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="386" parent="19" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="387" parent="19" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="388" parent="19" name="idx_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="389" parent="19" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="390" parent="20" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="391" parent="20" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="392" parent="20" name="position">
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;1&apos;</default-expression>
+      </column>
+      <column id="393" parent="20" name="name">
+        <comment>姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="394" parent="20" name="mobile">
+        <comment>联系电话</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="395" parent="20" name="relation">
+        <comment>关系：父母，兄弟，同事等</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="396" parent="20" name="cause">
+        <comment>认证不通过的原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="397" parent="20" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="398" parent="20" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="399" parent="20" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="400" parent="20" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="401" parent="20" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="402" parent="20" name="IDX_MOBILE">
+        <columns>mobile</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="403" parent="20" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="404" parent="20" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <key id="405" parent="20" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <column id="406" parent="21" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="407" parent="21" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="408" parent="21" name="face_picture_code">
+        <comment>图片code</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="409" parent="21" name="face_picture">
+        <comment>人脸识别拍的照片</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="410" parent="21" name="delta">
+        <mandatory>1</mandatory>
+        <data-type>varchar(2048)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="411" parent="21" name="failures">
+        <comment>失败次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="412" parent="21" name="cause">
+        <comment>认证不通过的原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="413" parent="21" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="414" parent="21" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="415" parent="21" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="416" parent="21" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="417" parent="21" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="418" parent="21" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="419" parent="21" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="420" parent="21" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="421" parent="21" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="422" parent="22" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="423" parent="22" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="424" parent="22" name="residential_status">
+        <comment>居住状况</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+      </column>
+      <column id="425" parent="22" name="province">
+        <comment>公司地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="426" parent="22" name="city">
+        <comment>城市</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="427" parent="22" name="area">
+        <comment>区</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="428" parent="22" name="address">
+        <comment>公司地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(256)</data-type>
+      </column>
+      <column id="429" parent="22" name="indigene">
+        <comment>是否居住地户籍：1-是 0-否</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(1)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="430" parent="22" name="indigene_years">
+        <comment>本地居住年限</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="431" parent="22" name="phone_area_code">
+        <comment>电话区号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(5)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="432" parent="22" name="phone_number">
+        <comment>电话号码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="433" parent="22" name="phone_ext">
+        <comment>电话分机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(6)</data-type>
+      </column>
+      <column id="434" parent="22" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="435" parent="22" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="436" parent="22" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="437" parent="22" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="438" parent="22" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="439" parent="22" name="IDX_ADDRESS">
+        <columns>address</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="440" parent="22" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="441" parent="22" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="442" parent="22" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="443" parent="22" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="444" parent="23" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="445" parent="23" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="446" parent="23" name="idcard">
+        <comment>身份证号码</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="447" parent="23" name="name">
+        <comment>姓名</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="448" parent="23" name="sex">
+        <comment>性别：男，女</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(2)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="449" parent="23" name="birthday">
+        <mandatory>1</mandatory>
+        <data-type>date</data-type>
+      </column>
+      <column id="450" parent="23" name="race">
+        <comment>民族</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(16)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="451" parent="23" name="address">
+        <comment>签发机关地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="452" parent="23" name="issued_by">
+        <comment>签发机关</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="453" parent="23" name="valid_date_start">
+        <mandatory>1</mandatory>
+        <data-type>date</data-type>
+      </column>
+      <column id="454" parent="23" name="valid_date_end">
+        <mandatory>1</mandatory>
+        <data-type>date</data-type>
+      </column>
+      <column id="455" parent="23" name="front_side_code">
+        <comment>图片Code</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="456" parent="23" name="front_side">
+        <comment>正面照片的URL地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="457" parent="23" name="back_side_code">
+        <comment>图片code</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="458" parent="23" name="back_side">
+        <comment>反面照片的URL地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="459" parent="23" name="failures">
+        <comment>失败认证次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="460" parent="23" name="cause">
+        <comment>认证不通过的原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="461" parent="23" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="462" parent="23" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="463" parent="23" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="464" parent="23" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="465" parent="23" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="466" parent="23" name="IDX_ADDRESS">
+        <columns>address</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="467" parent="23" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="468" parent="23" name="unq_idcard">
+        <columns>idcard</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <index id="469" parent="23" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="470" parent="23" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="471" parent="23" name="unq_idcard">
+        <columns>idcard</columns>
+        <underlying-index>unq_idcard</underlying-index>
+      </key>
+      <key id="472" parent="23" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="473" parent="24" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="474" parent="24" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="475" parent="24" name="job_status">
+        <comment>就业状态：工薪，学生，失业等</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="476" parent="24" name="company_name">
+        <comment>名称（就业状态是工薪和个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="477" parent="24" name="company_province">
+        <comment>公司地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="478" parent="24" name="company_city">
+        <comment>城市</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="479" parent="24" name="company_area">
+        <comment>区</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="480" parent="24" name="company_address">
+        <comment>公司地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(256)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="481" parent="24" name="company_phone_area_code">
+        <comment>电话区号（就业状态是工薪和个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(5)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="482" parent="24" name="company_phone_number">
+        <comment>电话号码（就业状态是工薪和个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="483" parent="24" name="company_phone_ext">
+        <comment>电话分机号（就业状态是工薪和个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(6)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="484" parent="24" name="type">
+        <comment>类型（所有就业状态）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="485" parent="24" name="position_rank">
+        <comment>职级</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="486" parent="24" name="job_certificate_code">
+        <comment>图片code</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="487" parent="24" name="job_certificate">
+        <comment>工作证明（图片）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="488" parent="24" name="latest_job_months">
+        <comment>最近一份工作时长（月）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="489" parent="24" name="month_salary">
+        <comment>月薪（就业状态是工薪和个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="490" parent="24" name="operating_years">
+        <comment>经营年限（就业状态是个体）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="491" parent="24" name="repayment_source">
+        <comment>还款来源（就业状态是其他）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="492" parent="24" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="493" parent="24" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="494" parent="24" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="495" parent="24" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="496" parent="24" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="497" parent="24" name="IDX_COMPANY_ADDRESS">
+        <columns>company_address</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="498" parent="24" name="IDX_COMPANY_NAME">
+        <columns>company_name</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="499" parent="24" name="IDX_COMPANY_PHONE_NUMBER_COMPANY_PHONE_AREA_CODE">
+        <columns>company_phone_number
+company_phone_area_code</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="500" parent="24" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="501" parent="24" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="502" parent="24" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="503" parent="24" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="504" parent="25" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="505" parent="25" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="506" parent="25" name="failures">
+        <comment>失败认证次数</comment>
+        <mandatory>1</mandatory>
+        <data-type>smallint(6)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="507" parent="25" name="cause">
+        <comment>认证不通过的原因</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="508" parent="25" name="status">
+        <comment>认证状态：1-通过 0-未通过</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(2)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <column id="509" parent="25" name="approved_time">
+        <comment>认证通过的时间</comment>
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="510" parent="25" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="511" parent="25" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="512" parent="25" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="513" parent="25" name="idx_time">
+        <columns>approved_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="514" parent="25" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="515" parent="25" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="516" parent="25" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="517" parent="26" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="518" parent="26" name="user_id">
+        <comment>用户ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>bigint(30)</data-type>
+      </column>
+      <column id="519" parent="26" name="referrer">
+        <comment>推荐人手机号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="520" parent="26" name="source">
+        <comment>用户来源，如baidu，应用宝</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="521" parent="26" name="channel">
+        <comment>注册渠道：app,h5,web</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(5)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="522" parent="26" name="page">
+        <comment>页面id，标识通过哪个注册页面注册的</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(11)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="523" parent="26" name="ip">
+        <comment>注册IP</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="524" parent="26" name="provice">
+        <comment>省份</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="525" parent="26" name="city">
+        <comment>城市</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="526" parent="26" name="address">
+        <comment>详细地址</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(200)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="527" parent="26" name="longitude">
+        <comment>经度</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(5,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="528" parent="26" name="latitude">
+        <comment> 纬度</comment>
+        <mandatory>1</mandatory>
+        <data-type>decimal(5,2)</data-type>
+        <default-expression>&apos;0.00&apos;</default-expression>
+      </column>
+      <column id="529" parent="26" name="browser">
+        <comment>浏览器类型（如果是通过网页注册）</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="530" parent="26" name="device_id">
+        <comment>手机的设备ID</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+      </column>
+      <column id="531" parent="26" name="device_model">
+        <comment>注册时的手机型号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="532" parent="26" name="device_os_version">
+        <comment>设备操作系统版本</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="533" parent="26" name="app_name">
+        <comment>APP的名字</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(10)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="534" parent="26" name="app_version">
+        <comment>APP的版本号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="535" parent="26" name="api_version">
+        <comment>注册API版本号</comment>
+        <mandatory>1</mandatory>
+        <data-type>varchar(20)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="536" parent="26" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="537" parent="26" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="538" parent="26" name="delete_flag">
+        <comment>删除标志: 0未删除，1已删除</comment>
+        <mandatory>1</mandatory>
+        <data-type>tinyint(4)</data-type>
+        <default-expression>&apos;0&apos;</default-expression>
+      </column>
+      <index id="539" parent="26" name="IDX_DEVICE_ID">
+        <columns>device_id</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="540" parent="26" name="idx_time">
+        <columns>create_time</columns>
+        <desc-columns></desc-columns>
+      </index>
+      <index id="541" parent="26" name="unq_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="542" parent="26" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+      <key id="543" parent="26" name="unq_user_id">
+        <columns>user_id</columns>
+        <underlying-index>unq_user_id</underlying-index>
+      </key>
+      <column id="544" parent="27" name="id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(32)</data-type>
+      </column>
+      <column id="545" parent="27" name="user_id">
+        <mandatory>1</mandatory>
+        <data-type>bigint(20)</data-type>
+      </column>
+      <column id="546" parent="27" name="score">
+        <mandatory>1</mandatory>
+        <data-type>varchar(8)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="547" parent="27" name="open_id">
+        <mandatory>1</mandatory>
+        <data-type>varchar(64)</data-type>
+        <default-expression>&apos;&apos;</default-expression>
+      </column>
+      <column id="548" parent="27" name="status">
+        <mandatory>1</mandatory>
+        <data-type>varchar(16)</data-type>
+      </column>
+      <column id="549" parent="27" name="create_time">
+        <mandatory>1</mandatory>
+        <data-type>datetime</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <column id="550" parent="27" name="update_time">
+        <mandatory>1</mandatory>
+        <data-type>timestamp</data-type>
+        <default-expression>&apos;CURRENT_TIMESTAMP&apos;</default-expression>
+      </column>
+      <index id="551" parent="27" name="idx_user_id">
+        <columns>user_id</columns>
+        <desc-columns></desc-columns>
+        <unique>1</unique>
+      </index>
+      <key id="552" parent="27" name="idx_user_id">
+        <columns>user_id</columns>
+        <underlying-index>idx_user_id</underlying-index>
+      </key>
+      <key id="553" parent="27" name="PRIMARY">
+        <columns>id</columns>
+        <primary>1</primary>
+      </key>
+    </database-model>
   </data-source>
   <data-source name="sqlite - dxd.sqlite3" uuid="5e9ee085-5e81-4802-b6d5-5349618e92ab">
     <database-info product="SQLite" version="3.8.6" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native"/>

@@ -28,8 +28,6 @@ class BaseReaderWriter():
 
         self.conn = conn
         self.charset = conn.get_character_set_info()['name']
-
-        logger.info('resetting default system charset with [%s] same as the database', self.charset)
         reload(sys)
         sys.setdefaultencoding(self.charset)
 
@@ -46,7 +44,7 @@ class BaseReaderWriter():
         except:
             raise
         else:
-            logger.info('column list in table %s->%s', table, col_list)
+            logger.info('column list->%s', col_list)
             return col_list
 
     def setCharset(self, charset='utf8'):
@@ -150,63 +148,43 @@ class TableLoader(BaseReaderWriter):
         logger.info('control information:\ncount:%s\nsource table:%s\ndate:%s\ndelimiter:%s\nmode:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator,mode)
 
         logger.info('reading header of data file')
+        col_position = []
         header = dataFile.readline().strip()    # C1|C2|C3
-        logger.debug('header->%s', header)
 
-        file_col_list = header.split(ctrlSeparator)  # ['C1', 'C2', 'C3']
-        logger.info('columns list in header->%s', file_col_list)
+        col_str = header.replace(ctrlSeparator, ',') # C1,C2,C3
+        logger.debug('column in data file->%s', col_str)
 
-        tbl_col_list = self.getColumnList(table)    # ['C1', 'C3', 'C4']
-        # logger.info('columns in target table %s->%s', table, tbl_col_list)
+        col_list = header.split(ctrlSeparator)  # ['C1', 'C2', 'C3']
 
-        comm_col_list = list(set(file_col_list).intersection(tbl_col_list))  # ['C1', 'C3']
-        logger.info('common columns list->%s', comm_col_list)
+        for n in range(len(col_list)):
+            col_position.append('%s')
 
-        if len(comm_col_list) <> len(file_col_list) or len(comm_col_list) <> len(tbl_col_list):
-            logger.warn('columns are not different between source table and target table')
+        col_position = ','.join(col_position)   # %s,%s,%s
 
-        comm_col_str = ','.join(comm_col_list)  # C1,C3
-        logger.info('common columns with target table->%s', comm_col_str)
-
-        comm_col_index_list = []
-        for col in comm_col_list:
-            index = file_col_list.index(col)
-            comm_col_index_list.append(index)
-            logger.debug('finding common column->[%s] and index->[%s] in data file', col, index)
-
-        logger.info('get common column list of index exist in data file->%s', comm_col_index_list)
-
-        if 'id' in comm_col_list:
-            id_index = file_col_list.index('id')
-            logger.debug('column "id" index->%s', id_index)
-        else:
-            logger.error('it is abnormal without primary key "id" in common column list')
+        try:
+            id_index = col_list.index('id')  # got index of the field called "id"
+            logger.debug('column "id" position->%s', id_index)
+        except:
+            logger.error('table %s do not have primary key "id", abnormally', table)
             raise
 
-        col_position = []
-        for n in range(len(comm_col_list)):
-            col_position.append('%s')
-        col_position = ','.join(col_position)   # %s,%s
-
-        logger.info('reading record of data file')
+        logger.info('reading data of data file')
         record_list = []
         id_list = []
 
-        for line in dataFile.readlines():
-            record = []
-            line = str(line).strip().split(ctrlSeparator)
-            for index in comm_col_index_list:
-                record.append(line[index])
-
-            id_list.append(line[id_index])  # collecting id list for deletion
-            record_list.append(record)  # collecting records list for inserting
+        for row in dataFile.readlines():
+            # print row.decode('utf8')
+            row_list = str(row).strip().split(ctrlSeparator)
+            id_list.append(row_list[id_index])
+            # logger.debug(id_list)
+            record_list.append(row_list)
 
         logger.info('control file validation')
         rowCnt = len(record_list)
 
         if int(rowCnt) == int(ctrlCnt):
             # print "-INFO: row count  match control count [%s]"% rowCnt
-            logger.info('row count[%s] match control count [%s]', rowCnt, ctrlCnt)
+            logger.info('row count  match control count [%s]', ctrlCnt)
         else:
             # print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
             logger.error('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
@@ -235,8 +213,7 @@ class TableLoader(BaseReaderWriter):
             logger.debug("total [%s] duplicate rows deleted", del_id_total)
 
             logger.info('inserting new record into target table %s', table)
-            tgt_ins_sql = "INSERT INTO %s (%s) values (%s) " % (table, comm_col_str, col_position)
-            logger.debug('pre sql->%s', tgt_ins_sql)
+            tgt_ins_sql = "INSERT INTO %s (%s) values (%s) " % (table, col_str, col_position)
             ins_id_total = 0
             for i in range(0, rowCnt, step):
                 bulk_record = record_list[i:i+step]

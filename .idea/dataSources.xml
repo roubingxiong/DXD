@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="651658848">
+  <component name="DataSourceManagerImpl" format="xml" hash="329921984">
     <data-source source="LOCAL" name="MySQL - robin@localhost" uuid="b82b1a04-193d-41b4-a0e9-09f60baed744">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
@@ -18,7 +18,7 @@
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://rm-bp1a224o5dj0p5g1e.mysql.rds.aliyuncs.com:3306/bi_sdxd</jdbc-url>
+      <jdbc-url>jdbc:mysql://localhost:3306/bi_sdxd</jdbc-url>
       <driver-properties>
         <property name="autoReconnect" value="true" />
         <property name="zeroDateTimeBehavior" value="convertToNull" />

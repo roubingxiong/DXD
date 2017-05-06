@@ -13,21 +13,19 @@ import os
 import logging
 logger = logging.getLogger('DXD_ETL')
 
-global email_count
-email_count = 2
-
 def write_report_email(messager={}, attachment=[]):
     table = messager['table_name']
     action = messager['action']
-    date = messager['from_date']
+    from_date = messager['from_date']
+    to_date = messager['to_date']
     status = messager['status']
     data_file = messager['data_file']
     ctrl_file =messager['ctrl_file']
     ctrl_count = messager['ctrl_count']
 
-    subject = action + ' ' + table + ' ' + status
+    subject = "%s %s %s" %(action, table, status)
 
-    table_subject = table + ' - ' + date
+    table_subject = "%s [%s - %s]"%(table,from_date, to_date)
 
     mail_style = """
     <style type="text/css">
@@ -91,9 +89,9 @@ def write_report_email(messager={}, attachment=[]):
 
     table_comment = """
         <tr>
-            <td class="tg-yw4l" colspan="8">Comments：测试中</td>
+            <td class="tg-yw4l" colspan="8">Comments：the extract/load do not include the data updated on %s</td>
           </tr>
-        """
+        """%to_date
 
     table_end = """</table>"""
 

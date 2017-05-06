@@ -162,11 +162,11 @@ def get_conn_by_type(config, type):
         port = int(config.get(type, 'port'))
         conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db, charset=charset, port=port) #, charset=charset
     except:
-        logger.error('failed to connect %s database, host: %s\tuser:%s\tdatabase:%s\tcharset:%s\tport:%s', type, host, user, db, charset,port)
+        logger.error('failed to connect %s database, \nhost: %s\nuser:%s\ndatabase:%s\ncharset:%s\tport:%s', type, host, user, db, charset,port)
         logger.error('can not get connection, please verify you connection information for database')
         raise
     else:
-        logger.info('connecting %s database, host: %s\tuser:%s\tdatabase:%s\tcharset:%s\tport:%s', type, host, user, db, charset,port)
+        logger.info('connecting %s database, \nhost: %s\nuser:%s\ndatabase:%s\ncharset:%s\nport:%s', type, host, user, db, charset,port)
 
     return conn
 
@@ -213,7 +213,8 @@ if __name__ == "__main__":
         messager = reload_messager(actionType, runDate, runMode, tblName,config, logger_file, messager)
         messager['status'] = 'Start'
 
-        # sendJobStatusEmail(messager=messager)
+        # messager['exception'] = ''
+        sendJobStatusEmail(messager=messager)
         # config = messager['config']
 
         messager = main(messager)
@@ -221,6 +222,7 @@ if __name__ == "__main__":
         logger.exception(e.message)
         logger.error('some exception occured, now sending error email')
         messager['status'] = 'Fail'
+        # messager['exception'] = e.message
         raise
     else:
         messager['status'] = 'Success'
@@ -233,4 +235,4 @@ if __name__ == "__main__":
         log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
     finally:
         logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        # sendJobStatusEmail(messager=messager, attachment=[logger_file])
+        sendJobStatusEmail(messager=messager, attachment=[logger_file])
