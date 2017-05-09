@@ -154,10 +154,12 @@ def sendEmail(messager={}, attachment=[]):
         smtpObj.ehlo()
         smtpObj.login(mail_user,mail_pass)
         smtpObj.sendmail(sender, receivers, message.as_string())
-
+        smtplib.SMTPDataError
     except smtplib.SMTPException as e:
         logger.exception(e.message)
         logger.info('failed to send %s email notification', messager['status'])
         raise
     else:
         logger.info('send email successfully')
+
+

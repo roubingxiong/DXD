@@ -215,6 +215,7 @@ if __name__ == "__main__":
 
         # messager['exception'] = ''
         sendJobStatusEmail(messager=messager)
+
         # config = messager['config']
 
         messager = main(messager)
