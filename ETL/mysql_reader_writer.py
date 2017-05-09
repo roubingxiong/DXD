@@ -42,7 +42,7 @@ class BaseReaderWriter():
             cursor = self.conn.cursor()
             cursor.execute(sql)
             for row in cursor.fetchall():
-                col_list.append(row[0])
+                col_list.append(str(row[0]).lower())
         except:
             raise
         else:
@@ -111,10 +111,11 @@ class TableExtractor(BaseReaderWriter):
             logger.exception('Exception occurred while generating data&control file. All database operation rollback, data and control file removed')
             raise
         else:
+            messager['status'] = 'Success'
             logger.info('Congrats! Table %s extracted successfully!', table)
         finally:
             logger.info('close database connection')
-            self.conn.close()
+            # self.conn.close()
             return messager
 
 
@@ -130,8 +131,8 @@ class TableLoader(BaseReaderWriter):
         dataFilePathName = messager['data_path_file']
 
         try:
-            # dataFile = open(dataFilePathName, 'r')
-            dataFile = codecs.open(dataFilePathName, 'r', self.charset)
+            dataFile = open(dataFilePathName, 'r')
+            # dataFile = codecs.open(dataFilePathName, 'r', self.charset)
             logger.info('opening data file->%s', dataFilePathName)
             # ctrlFile = open(ctrlFilePathName, 'r')
             ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
@@ -228,9 +229,6 @@ class TableLoader(BaseReaderWriter):
                 logger.debug('deleting %s rows', del_row_count)
                 del_id_total = del_id_total + cursor.rowcount
 
-                if del_row_count == 0:
-                    logger.info('no duplicate id exist in target table')
-                    break
 
             logger.debug("total [%s] duplicate rows deleted", del_id_total)
 
@@ -256,10 +254,11 @@ class TableLoader(BaseReaderWriter):
             logger.exception('Exception occured while loading records, the transaction roll back, database would not be effected')
             raise
         else:
+            messager['status'] = 'Success'
             logger.info('Congrats! File loading successfully')
         finally:
             ctrlFile.close()
             dataFile.close()
             logger.info('close database connection')
-            self.conn.close()
+            # self.conn.close()
             return messager

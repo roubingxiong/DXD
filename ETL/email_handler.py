@@ -14,18 +14,37 @@ import logging
 logger = logging.getLogger('DXD_ETL')
 
 def write_report_email(messager={}, attachment=[]):
-    table = messager['table_name']
-    action = messager['action']
-    from_date = messager['from_date']
-    to_date = messager['to_date']
-    status = messager['status']
-    data_file = messager['data_file']
-    ctrl_file =messager['ctrl_file']
-    ctrl_count = messager['ctrl_count']
+    msg_list = []
+    rowNum = 1
+    if type(messager) == type([]):
+        for msg in messager:
+            table = msg['table_name']
+            action = msg['action']
+            from_date = msg['from_date']
+            to_date = msg['to_date']
+            status = msg['status']
+            data_file = msg['data_file']
+            ctrl_file =msg['ctrl_file']
+            ctrl_count = msg['ctrl_count']
+            msg_list.append((rowNum, action, table, data_file, ctrl_file, ctrl_count))
+            rowNum = rowNum + 1
 
-    subject = "%s %s %s" %(action, table, status)
+        subject = "%s %s %s" %(action, table, status)
 
-    table_subject = "%s [%s - %s]"%(table,from_date, to_date)
+        table_subject = "%s [%s - %s]"%(table,from_date, to_date)
+    else:
+        table = messager['table_name']
+        action = messager['action']
+        from_date = messager['from_date']
+        to_date = messager['to_date']
+        status = messager['status']
+        data_file = messager['data_file']
+        ctrl_file =messager['ctrl_file']
+        ctrl_count = messager['ctrl_count']
+        msg_list.append((rowNum, action, table, data_file, ctrl_file, ctrl_count))
+        subject = "%s %s %s" %(action, table, status)
+
+        table_subject = "%s [%s - %s]"%(table,from_date, to_date)
 
     mail_style = """
     <style type="text/css">
@@ -67,25 +86,30 @@ def write_report_email(messager={}, attachment=[]):
 
 
     table_body = ''''''
-    rowNum = 1
+    print msg_list
+    for data in msg_list:   #draw each row
+        html_table_row_begin = "<tr>"
 
-    html_table_row_body = '''
+        html_table_row_body = '''
         <td class="tg-yw4l">%s</td>
         <td class="tg-yw4l">%s</td>
         <td class="tg-yw4l">%s</td>
         <td class="tg-lqy6">%s</td>
         <td class="tg-lqy6">%s</td>
         <td class="tg-lqy6">%s</td>
-        ''' % (rowNum, action, table, data_file, ctrl_file, ctrl_count)
+        ''' % data
 
-    if status == 'Fail':
-        html_table_row_status = '''<td class="tg-0fim">%s</td>''' % (status)
-    else:
-        html_table_row_status = '''<td class="tg-ix49">%s</td>''' % (status)
+        if status == 'Fail':
+            html_table_row_status = '''<td class="tg-0fim">%s</td>''' % (status)
+        else:
+            html_table_row_status = '''<td class="tg-ix49">%s</td>''' % (status)
 
-    html_table_row_end = "</tr>"
+        html_table_row_end = "</tr>"
 
-    table_body = table_header + html_table_row_body + html_table_row_status + html_table_row_end
+        table_body = table_body + html_table_row_begin + html_table_row_body + html_table_row_status + html_table_row_end
+
+
+    # table_body = table_header + table_body
 
     table_comment = """
         <tr>
@@ -95,7 +119,7 @@ def write_report_email(messager={}, attachment=[]):
 
     table_end = """</table>"""
 
-    mail_msg = mail_style + mail_header + table_begin +table_body + table_comment + table_end + mail_footer
+    mail_msg = mail_style + mail_header + table_begin + table_header +table_body + table_comment + table_end + mail_footer
 
     if len(attachment) > 0:
         message = MIMEMultipart()
@@ -132,7 +156,7 @@ def sendJobStatusEmail(messager={}, attachment=[]):
 
 def sendEmail(messager={}, attachment=[]):
     # print messager
-    config = messager['config']
+    config = messager[0]['config']
     mail_host=config.get('email','host')  
     mail_user=config.get('email','user')    
     mail_pass=config.get('email','passwd')   
@@ -145,7 +169,7 @@ def sendEmail(messager={}, attachment=[]):
     message['To'] = receivers
 
     try:
-        logger.info('sending %s email notification', messager['status'])
+        logger.info('sending status email notification')
         smtpObj = smtplib.SMTP()
         # smtpObj.connect(mail_host, 25)    
         smtpObj.connect(mail_host, 587)    # hotmail

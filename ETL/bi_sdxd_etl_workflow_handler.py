@@ -214,7 +214,7 @@ if __name__ == "__main__":
         messager['status'] = 'Start'
 
         # messager['exception'] = ''
-        sendJobStatusEmail(messager=messager)
+        # sendJobStatusEmail(messager=messager)
 
         # config = messager['config']
 
@@ -236,4 +236,4 @@ if __name__ == "__main__":
         log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
     finally:
         logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        sendJobStatusEmail(messager=messager, attachment=[logger_file])
+        # sendJobStatusEmail(messager=messager, attachment=[logger_file])

@@ -4,6 +4,7 @@
 import os, sys, time
 from subprocess import call
 import logging
+import re
 
 logger = logging.getLogger('DXD_ETL')
 
@@ -46,6 +47,20 @@ def watch_file(dir, filename, expireTime=10):
 
     return False
 
+def watch_files(dir, pattern='t_decision_rule_log_[0-9]{8}.ctrl.[0-9]{8}.[0-9]{8}'):
+    files = os.listdir(dir)
+    stab_file_list =[]
+    if len(files) == 0:
+        logger.warn("no files match %s", pattern)
+    else:
+        for file in files:
+            if re.match(pattern, file):
+                watch_file(dir, file)
+                stab_file_list.append(file)
+
+    logger.info("find data file with pattern %s", pattern)
+
+    return stab_file_list
 
 def clean_file(dir=os.getcwd(), days=7):
     logger.info('clean files older than %s days under directory %s', days, dir)
