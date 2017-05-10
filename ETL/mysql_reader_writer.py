@@ -58,7 +58,7 @@ class TableExtractor(BaseReaderWriter):
     def __init__(self, conn):
         BaseReaderWriter.__init__(self, conn)
 
-    def extractTableToFile(self, messager={}, delimiter='|'):
+    def extractTableToFile(self, messager={}, delimiter='|~|'):
         try:
             ctrlFilePathName = messager['ctrl_path_file']
             dataFilePathName = messager['data_path_file']
@@ -73,21 +73,22 @@ class TableExtractor(BaseReaderWriter):
         except:
             raise
 
-        col_list = self.getColumnList(table)
-        col_str = ','.join(col_list) #used in sql
-        separator = delimiter
-        header = separator.join(col_list) #used in data file
-
-        logger.info('column->%s',col_str)
-
-        ex_sql = "select concat_ws('%s',%s) FROM %s where update_time>='%s' and update_time<'%s';" % (separator, col_str, table, fromDateStr, toDateStr) # not include end date
 
         try:
+            col_list = self.getColumnList(table)
+            col_str = ','.join(col_list) #used in sql
+            separator = delimiter
+            header = separator.join(col_list) #used in data file
+
+            logger.info('column->%s',col_str)
+
+            ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '') FROM %s where update_time>='%s' and update_time<'%s';" % (separator, col_str, table, fromDateStr, toDateStr) # not include end date
+
             logger.info('running extract sql->%s', ex_sql)
             cursor = self.conn.cursor()
             cursor.execute(ex_sql)
             ctrlCnt = cursor.rowcount;
-            logger.debug('total %s rows return', ctrlCnt)
+            logger.debug('total [%s] rows return', ctrlCnt)
 
             logger.info('writing header to data file\n%s', header)
             dataFile.write(header + '\n')
@@ -102,7 +103,7 @@ class TableExtractor(BaseReaderWriter):
             ctrlFile.write(ctrl_info)
 
             messager['ctrl_count'] = ctrlCnt
-        except:
+        except Exception as e:
             self.conn.rollback()
             ctrlFile.close()
             dataFile.close()
@@ -111,10 +112,9 @@ class TableExtractor(BaseReaderWriter):
             logger.exception('Exception occurred while generating data&control file. All database operation rollback, data and control file removed')
             raise
         else:
-            messager['status'] = 'Success'
             logger.info('Congrats! Table %s extracted successfully!', table)
         finally:
-            logger.info('close database connection')
+            # logger.info('close database connection')
             # self.conn.close()
             return messager
 
@@ -134,12 +134,12 @@ class TableLoader(BaseReaderWriter):
             dataFile = open(dataFilePathName, 'r')
             # dataFile = codecs.open(dataFilePathName, 'r', self.charset)
             logger.info('opening data file->%s', dataFilePathName)
-            # ctrlFile = open(ctrlFilePathName, 'r')
-            ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
+            ctrlFile = open(ctrlFilePathName, 'r')
+            # ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
             logger.info('openings data file->%s', ctrlFilePathName)
-        except:
+        except Exception as e:
             logger.error('failed to open data file(%s) or control file(%s)', dataFilePathName, ctrlFilePathName)
-            raise
+            raise e
 
         logger.info('reading control file')
         ctrlInfo = ctrlFile.readlines()
@@ -152,6 +152,7 @@ class TableLoader(BaseReaderWriter):
 
         logger.info('reading header of data file')
         header = dataFile.readline().strip()    # C1|C2|C3
+        # header = 'C1|C2|C3'
         logger.debug('header->%s', header)
 
         file_col_list = header.split(ctrlSeparator)  # ['C1', 'C2', 'C3']
@@ -182,7 +183,7 @@ class TableLoader(BaseReaderWriter):
             logger.debug('column "id" index->%s', id_index)
         else:
             logger.error('it is abnormal without primary key "id" in common column list')
-            raise
+            raise Exception('it is abnormal without primary key "id" in common column list')
 
         col_position = []
         for n in range(len(comm_col_list)):
@@ -194,13 +195,18 @@ class TableLoader(BaseReaderWriter):
         id_list = []
 
         for line in dataFile.readlines():
+            # logger.debug('line 2->%s', line)
             record = []
             line = str(line).strip().split(ctrlSeparator)
+            # logger.debug('line 3->%s', line)
             for index in comm_col_index_list:
+                # logger.debug('index->%s', index)
                 record.append(line[index])
 
             id_list.append(line[id_index])  # collecting id list for deletion
             record_list.append(record)  # collecting records list for inserting
+
+        # print id_list
 
         logger.info('control file validation')
         rowCnt = len(record_list)
@@ -219,7 +225,7 @@ class TableLoader(BaseReaderWriter):
 
             logger.info('deleting duplicate from target table %s', table)
             del_id_total = 0
-            for i in range(0, len(id_list), step):
+            for i in range(0, len(id_list)-1, step):
                 bulk_id = str(tuple(id_list[i:i+step]))
                 tgt_del_sql = "delete from %s WHERE id in %s" % (table, bulk_id)
 
@@ -228,7 +234,6 @@ class TableLoader(BaseReaderWriter):
                 del_row_count = cursor.rowcount
                 logger.debug('deleting %s rows', del_row_count)
                 del_id_total = del_id_total + cursor.rowcount
-
 
             logger.debug("total [%s] duplicate rows deleted", del_id_total)
 
@@ -249,16 +254,15 @@ class TableLoader(BaseReaderWriter):
             messager['ctrl_count'] = rowCnt
             self.conn.commit()
             logger.info('changes committed')
-        except:
+        except Exception as e:
             self.conn.rollback()
             logger.exception('Exception occured while loading records, the transaction roll back, database would not be effected')
-            raise
+            raise e
         else:
-            messager['status'] = 'Success'
             logger.info('Congrats! File loading successfully')
         finally:
             ctrlFile.close()
             dataFile.close()
-            logger.info('close database connection')
+            # logger.info('close database connection')
             # self.conn.close()
             return messager

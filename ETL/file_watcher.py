@@ -45,7 +45,6 @@ def watch_file(dir, filename, expireTime=10):
     logger.error('%s is not exist, file watching run out of %s seconds', absFile, expireTime)
     raise Exception(absFile + ' is not exist, file watching run out of ' + str(expireTime) + ' seconds' )
 
-    return False
 
 def watch_files(dir, pattern='t_decision_rule_log_[0-9]{8}.ctrl.[0-9]{8}.[0-9]{8}'):
     files = os.listdir(dir)
