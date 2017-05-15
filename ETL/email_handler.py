@@ -13,38 +13,32 @@ import os
 import logging
 logger = logging.getLogger('DXD_ETL')
 
-def write_report_email(messager={}, attachment=[]):
+
+def write_report_email(messager=[], attachment=[]):
     msg_list = []
-    rowNum = 1
-    if type(messager) == type([]):
-        for msg in messager:
-            table = msg['table_name']
-            action = msg['action']
-            from_date = msg['from_date']
-            to_date = msg['to_date']
-            status = msg['status']
-            data_file = msg['data_file']
-            ctrl_file =msg['ctrl_file']
-            ctrl_count = msg['ctrl_count']
-            msg_list.append((rowNum, action, table, data_file, ctrl_file, ctrl_count))
-            rowNum = rowNum + 1
+    row_num = 1
+    global from_date
+    global to_date
+    global action_type
+    global run_mode
 
-        subject = "%s %s %s" %(action, table, status)
+    for msg in messager:
+        table = msg['table_name']
+        action_type = msg['action_type']
+        from_date = msg['from_date']
+        to_date = msg['to_date']
+        status = msg['status']
+        data_file = msg['data_file']
+        ctrl_file =msg['ctrl_file']
+        ctrl_count = msg['ctrl_count']
+        run_mode = msg['run_mode']
+        msg_list.append((row_num, action_type, table, data_file, ctrl_file, ctrl_count, status))
 
-        table_subject = "%s [%s - %s]"%(table,from_date, to_date)
-    else:
-        table = messager['table_name']
-        action = messager['action']
-        from_date = messager['from_date']
-        to_date = messager['to_date']
-        status = messager['status']
-        data_file = messager['data_file']
-        ctrl_file =messager['ctrl_file']
-        ctrl_count = messager['ctrl_count']
-        msg_list.append((rowNum, action, table, data_file, ctrl_file, ctrl_count))
-        subject = "%s %s %s" %(action, table, status)
+        row_num = row_num + 1
 
-        table_subject = "%s [%s - %s]"%(table,from_date, to_date)
+    subject = "ETL[%s] Status Report - %s[%s]"%(action_type, to_date, run_mode)
+
+    table_subject = "ETL Status Report [%s - %s]"%(from_date, to_date)
 
     mail_style = """
     <style type="text/css">
@@ -54,12 +48,13 @@ def write_report_email(messager={}, attachment=[]):
         .tg .tg-h5s3{background-color:#f8ff00;vertical-align:top}
         .tg .tg-mb3i{background-color:#D2E4FC;text-align:right;vertical-align:top}
         .tg .tg-v4ss{background-color:#D2E4FC;font-weight:bold;vertical-align:top}
-        .tg .tg-lqy6{text-align:right;vertical-align:top}
+        .tg .tg-lqy6{text-align:left;vertical-align:top}
+        .tg .tg-count{text-align:right;vertical-align:top}
         .tg .tg-amwm{font-weight:bold;text-align:center;vertical-align:top}
         .tg .tg-yw4l{vertical-align:top}
         .tg .tg-6k2t{background-color:#D2E4FC;vertical-align:top}
-        .tg .tg-0fim{background-color:#fd6864;text-align:center;vertical-align:top}
-        .tg .tg-ix49{background-color:#32cb00;text-align:center;vertical-align:top}
+        .tg .tg-fail{background-color:#fd6864;text-align:center;vertical-align:top}
+        .tg .tg-success{background-color:#32cb00;text-align:center;vertical-align:top}
     </style>
     """
     mail_header = """
@@ -76,50 +71,57 @@ def write_report_email(messager={}, attachment=[]):
       </tr>
       <tr>
         <td class="tg-v4ss">No</td>
-        <td class="tg-v4ss">Action</td>
+        <td class="tg-v4ss">action_type</td>
         <td class="tg-v4ss">table</td>
         <td class="tg-v4ss">data_file</td>
         <td class="tg-v4ss">ctrl_file</td>
         <td class="tg-v4ss">row_count</td>
         <td class="tg-v4ss">status</td>
-      </tr>""" % (table_subject)
+      </tr>""" % table_subject
 
+    table_rows = ''''''
 
-    table_body = ''''''
-    print msg_list
     for data in msg_list:   #draw each row
-        html_table_row_begin = "<tr>"
-
-        html_table_row_body = '''
-        <td class="tg-yw4l">%s</td>
-        <td class="tg-yw4l">%s</td>
-        <td class="tg-yw4l">%s</td>
-        <td class="tg-lqy6">%s</td>
-        <td class="tg-lqy6">%s</td>
-        <td class="tg-lqy6">%s</td>
-        ''' % data
+        status = data[len(data)-1]
 
         if status == 'Fail':
-            html_table_row_status = '''<td class="tg-0fim">%s</td>''' % (status)
+            table_row = '''
+            <tr>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-lqy6">%s</td>
+            <td class="tg-lqy6">%s</td>
+            <td class="tg-count">%s</td>
+            <td class="tg-fail">%s</td>
+            </tr>
+            ''' % data
+        elif status == 'Success':
+            table_row = '''
+            <tr>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-yw4l">%s</td>
+            <td class="tg-lqy6">%s</td>
+            <td class="tg-lqy6">%s</td>
+            <td class="tg-count">%s</td>
+            <td class="tg-success">%s</td>
+            </tr>
+            ''' % data
         else:
-            html_table_row_status = '''<td class="tg-ix49">%s</td>''' % (status)
+            pass
 
-        html_table_row_end = "</tr>"
-
-        table_body = table_body + html_table_row_begin + html_table_row_body + html_table_row_status + html_table_row_end
-
-
-    # table_body = table_header + table_body
+        table_rows = table_rows + table_row
 
     table_comment = """
         <tr>
             <td class="tg-yw4l" colspan="8">Comments：the extract/load do not include the data updated on %s</td>
           </tr>
-        """%to_date
+        """ % to_date
 
     table_end = """</table>"""
 
-    mail_msg = mail_style + mail_header + table_begin + table_header +table_body + table_comment + table_end + mail_footer
+    mail_msg = mail_style + mail_header + table_begin + table_header + table_rows + table_comment + table_end + mail_footer
 
     if len(attachment) > 0:
         message = MIMEMultipart()
@@ -134,7 +136,7 @@ def write_report_email(messager={}, attachment=[]):
             # attachment display name
             att["Content-Disposition"] = 'attachment; filename=' + attach_basename
             message.attach(att)
-            print 'attached ->' + attach
+            logger.info('attaching file ->%s',attach)
     else:
         message = MIMEText(mail_msg, 'html', 'utf-8')
 
@@ -143,20 +145,20 @@ def write_report_email(messager={}, attachment=[]):
     return message
 
 
-def sendJobStatusEmail(messager={}, attachment=[]):
+def sendJobStatusEmail(config, messager=[], attachment=[]):
 
     wait = 20
     try:
-        sendEmail(messager, attachment)
+        sendEmail(config, messager, attachment)
     except Exception as e:
         logger.exception(e.message)
         logger.warn('exception occured while sending email, resend it %s seconds later', wait)
         time.sleep(wait)
-        sendEmail(messager, attachment)
+        sendEmail(config, messager, attachment)
 
-def sendEmail(messager={}, attachment=[]):
+def sendEmail(config, messager=[], attachment=[]):
     # print messager
-    config = messager[0]['config']
+
     mail_host=config.get('email','host')  
     mail_user=config.get('email','user')    
     mail_pass=config.get('email','passwd')   
@@ -181,7 +183,7 @@ def sendEmail(messager={}, attachment=[]):
         smtplib.SMTPDataError
     except smtplib.SMTPException as e:
         logger.exception(e.message)
-        logger.info('failed to send %s email notification', messager['status'])
+        logger.info('failed to send status email notification')
         raise
     else:
         logger.info('send email successfully')

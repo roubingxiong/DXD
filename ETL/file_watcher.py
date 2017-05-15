@@ -10,14 +10,14 @@ logger = logging.getLogger('DXD_ETL')
 
 # cntl = "table + '.ctrl.' + runDateStr"
 
-def watch_file(dir, filename, expireTime=10):
+def watch_file(dir, filename, expireTime=1800):
     absFile = os.path.join(dir, filename)
     logger.info('start watching file %s', absFile)
     # print "-INFO: start watching file %s"%(absFile)
 
     this = last = size = 0
 
-    freq = 5 #10s each check
+    freq = 10 #10s each check
 
     check_times_limitation = expireTime/freq
 

@@ -2,25 +2,16 @@
 #!/usr/bin/env python2
 
 __author__ = 'zhxiong'
-import MySQLdb # this is a third party module, you can find from internet and install it
-import time
-import datetime
+
 import os
-from os import path, access, R_OK, W_OK
-import ConfigParser
 import logging
 import codecs
-
 import sys
 
-
-today = datetime.date.today()
-yestoday = today - datetime.timedelta(days=1)
-checkAcc_date = yestoday.strftime('%Y-%m-%d')
-
-todayYYYYMMDD = today.strftime('%Y%m%d')
+import split_time
 
 logger = logging.getLogger('DXD_ETL')
+
 
 class BaseReaderWriter():
 
@@ -49,9 +40,16 @@ class BaseReaderWriter():
             logger.info('column list in table %s->%s', table, col_list)
             return col_list
 
+    def is_table_exist(self, table):
+        pass
+
+    def create_table_if_not_exist(self, table, ddl):
+        pass
+
     def setCharset(self, charset='utf8'):
         self.charset = charset
         return self.charset
+
 
 class TableExtractor(BaseReaderWriter):
 
@@ -65,7 +63,7 @@ class TableExtractor(BaseReaderWriter):
             fromDateStr = messager['from_date']
             toDateStr = messager['to_date']
             table = messager['table_name']
-            mode = messager['mode']
+            runMode = messager['run_mode']
             dataFile = codecs.open(dataFilePathName, 'w+', self.charset)
             logger.info('create data file->%s', dataFilePathName)
             ctrlFile = codecs.open(ctrlFilePathName, 'w+', self.charset)
@@ -73,37 +71,49 @@ class TableExtractor(BaseReaderWriter):
         except:
             raise
 
-
         try:
             col_list = self.getColumnList(table)
-            col_str = ','.join(col_list) #used in sql
+
+            col_str_list = []
+            for col in col_list:
+                col_str_list.append("ifnull(%s, '')" % col)  #  convert null to empty, otherwise the column would be missed in data file
+
+            col_str = ','.join(col_str_list) #used in sql
+
             separator = delimiter
             header = separator.join(col_list) #used in data file
 
             logger.info('column->%s',col_str)
 
-            ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '') FROM %s where update_time>='%s' and update_time<'%s';" % (separator, col_str, table, fromDateStr, toDateStr) # not include end date
-
-            logger.info('running extract sql->%s', ex_sql)
-            cursor = self.conn.cursor()
-            cursor.execute(ex_sql)
-            ctrlCnt = cursor.rowcount;
-            logger.debug('total [%s] rows return', ctrlCnt)
-
             logger.info('writing header to data file\n%s', header)
             dataFile.write(header + '\n')
 
-            logger.info('writing data to data file')
-            for row in cursor.fetchall():
-                dataFile.write(row[0] + '\n')
-                dataFile.flush()
+            datetime_snipet_list = split_time.split_time(from_date=fromDateStr, to_date=toDateStr, hours=1)
+            ctrlCnt = 0
+            cursor = self.conn.cursor()
+            for from_time, to_time in datetime_snipet_list:
+                ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '')  FROM %s where update_time>='%s' and update_time<='%s';" % (separator, col_str, table, from_time, to_time) # not include end date
 
-            ctrl_info = "%s\n%s\n%s%s%s\n%s\n%s"%(ctrlCnt, table, fromDateStr, separator, toDateStr, separator, mode)
+                logger.info('running extract sql->%s', ex_sql)
+                cursor.execute(ex_sql)
+                row_count = cursor.rowcount;
+                ctrlCnt = ctrlCnt + row_count
+
+                for row in cursor.fetchall():
+                    dataFile.write(row[0] + '\n')
+                    dataFile.flush()
+
+                logger.debug('batch read and write [%s] rows', row_count)
+
+            logger.debug('total [%s] rows return', ctrlCnt)
+
+
+            ctrl_info = "%s\n%s\n%s%s%s\n%s\n%s"%(ctrlCnt, table, fromDateStr, separator, toDateStr, separator, runMode)
             logger.info('writing information to control file\n%s', ctrl_info)
             ctrlFile.write(ctrl_info)
 
             messager['ctrl_count'] = ctrlCnt
-        except Exception as e:
+        except:
             self.conn.rollback()
             ctrlFile.close()
             dataFile.close()
@@ -113,10 +123,11 @@ class TableExtractor(BaseReaderWriter):
             raise
         else:
             logger.info('Congrats! Table %s extracted successfully!', table)
-        finally:
+        # finally:
             # logger.info('close database connection')
             # self.conn.close()
-            return messager
+            # return messager
+            # pass
 
 
 class TableLoader(BaseReaderWriter):
@@ -148,7 +159,7 @@ class TableLoader(BaseReaderWriter):
         ctrlDate = str(ctrlInfo[2]).strip()
         ctrlSeparator = str(ctrlInfo[3]).strip()
         mode = str(ctrlInfo[4]).strip()
-        logger.info('control information:\ncount:%s\nsource table:%s\ndate:%s\ndelimiter:%s\nmode:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator,mode)
+        logger.info('control information:\ncount:%s\ntable:%s\ndate:%s\ndelimiter:%s\nmode:%s',ctrlCnt, ctrlTable, ctrlDate,ctrlSeparator,mode)
 
         logger.info('reading header of data file')
         header = dataFile.readline().strip()    # C1|C2|C3
@@ -174,9 +185,9 @@ class TableLoader(BaseReaderWriter):
         for col in comm_col_list:
             index = file_col_list.index(col)
             comm_col_index_list.append(index)
-            logger.debug('finding common column->[%s] and index->[%s] in data file', col, index)
+            # logger.debug('finding common column->[%s] and index->[%s] in data file', col, index)
 
-        logger.info('get common column list of index exist in data file->%s', comm_col_index_list)
+        logger.info('get common column index in data file->%s', comm_col_index_list)
 
         if 'id' in comm_col_list:
             id_index = file_col_list.index('id')
@@ -201,8 +212,12 @@ class TableLoader(BaseReaderWriter):
             # logger.debug('line 3->%s', line)
             for index in comm_col_index_list:
                 # logger.debug('index->%s', index)
-                record.append(line[index])
-
+                try:
+                    record.append(line[index])
+                except:
+                    print line
+                    print index
+                    exit()
             id_list.append(line[id_index])  # collecting id list for deletion
             record_list.append(record)  # collecting records list for inserting
 
@@ -254,15 +269,15 @@ class TableLoader(BaseReaderWriter):
             messager['ctrl_count'] = rowCnt
             self.conn.commit()
             logger.info('changes committed')
-        except Exception as e:
+        except:
             self.conn.rollback()
             logger.exception('Exception occured while loading records, the transaction roll back, database would not be effected')
-            raise e
+            raise
         else:
             logger.info('Congrats! File loading successfully')
-        finally:
-            ctrlFile.close()
-            dataFile.close()
-            # logger.info('close database connection')
-            # self.conn.close()
-            return messager
+        # finally:
+        #     ctrlFile.close()
+        #     dataFile.close()
+        #     # logger.info('close database connection')
+        #     # self.conn.close()
+        #     return messager
