@@ -17,7 +17,7 @@ def watch_file(dir, filename, expireTime=1800):
 
     this = last = size = 0
 
-    freq = 10 #10s each check
+    freq = 5 #10s each check
 
     check_times_limitation = expireTime/freq
 
