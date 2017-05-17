@@ -7,128 +7,10 @@ import os
 import logging
 import codecs
 import sys
-
+import BaseReaderWriter
 import split_time
 
 logger = logging.getLogger('DXD_ETL')
-
-
-class BaseReaderWriter():
-
-    def __init__(self, conn): # the config file put in the same location with this script
-
-        self.conn = conn
-        self.charset = conn.get_character_set_info()['name']
-
-        logger.info('resetting default system charset with [%s] same as the database', self.charset)
-        reload(sys)
-        sys.setdefaultencoding(self.charset)
-
-    def getColumnList(self, table):
-        logger.info('getting columns from table ddl')
-        col_list = []
-        sql = "desc %s;"% table
-        try:
-            logger.info('running sql->%s', sql)
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-            for row in cursor.fetchall():
-                col_list.append(str(row[0]).lower())
-        except:
-            raise
-        else:
-            logger.info('column list in table %s->%s', table, col_list)
-            return col_list
-
-    def is_table_exist(self, table):
-        pass
-
-    def create_table_if_not_exist(self, table, ddl):
-        pass
-
-    def setCharset(self, charset='utf8'):
-        self.charset = charset
-        return self.charset
-
-
-class TableExtractor(BaseReaderWriter):
-
-    def __init__(self, conn):
-        BaseReaderWriter.__init__(self, conn)
-
-    def extractTableToFile(self, messager={}, delimiter='|~|'):
-        try:
-            ctrlFilePathName = messager['ctrl_path_file']
-            dataFilePathName = messager['data_path_file']
-            fromDateStr = messager['from_date']
-            toDateStr = messager['to_date']
-            table = messager['table_name']
-            runMode = messager['run_mode']
-            dataFile = codecs.open(dataFilePathName, 'w+', self.charset)
-            logger.info('create data file->%s', dataFilePathName)
-            ctrlFile = codecs.open(ctrlFilePathName, 'w+', self.charset)
-            logger.info('create control file->%s', ctrlFilePathName)
-        except:
-            raise
-
-        try:
-            col_list = self.getColumnList(table)
-
-            col_str_list = []
-            for col in col_list:
-                col_str_list.append("ifnull(%s, '')" % col)  #  convert null to empty, otherwise the column would be missed in data file
-
-            col_str = ','.join(col_str_list) #used in sql
-
-            separator = delimiter
-            header = separator.join(col_list) #used in data file
-
-            logger.info('column->%s',col_str)
-
-            logger.info('writing header to data file\n%s', header)
-            dataFile.write(header + '\n')
-
-            datetime_snipet_list = split_time.split_time(from_date=fromDateStr, to_date=toDateStr, hours=1)
-            ctrlCnt = 0
-            cursor = self.conn.cursor()
-            for from_time, to_time in datetime_snipet_list:
-                ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '')  FROM %s where update_time>='%s' and update_time<='%s';" % (separator, col_str, table, from_time, to_time) # not include end date
-
-                logger.info('running extract sql->%s', ex_sql)
-                cursor.execute(ex_sql)
-                row_count = cursor.rowcount;
-                ctrlCnt = ctrlCnt + row_count
-
-                for row in cursor.fetchall():
-                    dataFile.write(row[0] + '\n')
-                    dataFile.flush()
-
-                logger.debug('batch read and write [%s] rows', row_count)
-
-            logger.debug('total [%s] rows return', ctrlCnt)
-
-
-            ctrl_info = "%s\n%s\n%s%s%s\n%s\n%s"%(ctrlCnt, table, fromDateStr, separator, toDateStr, separator, runMode)
-            logger.info('writing information to control file\n%s', ctrl_info)
-            ctrlFile.write(ctrl_info)
-
-            messager['ctrl_count'] = ctrlCnt
-        except:
-            self.conn.rollback()
-            ctrlFile.close()
-            dataFile.close()
-            os.remove(dataFilePathName)
-            os.remove(ctrlFilePathName)
-            logger.exception('Exception occurred while generating data&control file. All database operation rollback, data and control file removed')
-            raise
-        else:
-            logger.info('Congrats! Table %s extracted successfully!', table)
-        # finally:
-            # logger.info('close database connection')
-            # self.conn.close()
-            # return messager
-            # pass
-
 
 class TableLoader(BaseReaderWriter):
 
@@ -189,82 +71,55 @@ class TableLoader(BaseReaderWriter):
 
         logger.info('get common column index in data file->%s', comm_col_index_list)
 
-        if 'id' in comm_col_list:
-            id_index = file_col_list.index('id')
-            logger.debug('column "id" index->%s', id_index)
-        else:
-            logger.error('it is abnormal without primary key "id" in common column list')
-            raise Exception('it is abnormal without primary key "id" in common column list')
-
         col_position = []
         for n in range(len(comm_col_list)):
             col_position.append('%s')
         col_position = ','.join(col_position)   # %s,%s
 
-        logger.info('reading record of data file')
-        record_list = []
-        id_list = []
-
-        for line in dataFile.readlines():
-            # logger.debug('line 2->%s', line)
-            record = []
-            line = str(line).strip().split(ctrlSeparator)
-            # logger.debug('line 3->%s', line)
-            for index in comm_col_index_list:
-                # logger.debug('index->%s', index)
-                try:
-                    record.append(line[index])
-                except:
-                    print line
-                    print index
-                    exit()
-            id_list.append(line[id_index])  # collecting id list for deletion
-            record_list.append(record)  # collecting records list for inserting
-
-        # print id_list
-
-        logger.info('control file validation')
-        rowCnt = len(record_list)
-
-        if int(rowCnt) == int(ctrlCnt):
-            # print "-INFO: row count  match control count [%s]"% rowCnt
-            logger.info('row count[%s] match control count [%s]', rowCnt, ctrlCnt)
-        else:
-            # print "-INFO: row count [%s] mismatch control count [%s]"% rowCnt, ctrlCnt
-            logger.error('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
-            raise Exception('row count [%s] mismatch control count [%s]', rowCnt, ctrlCnt)
-
         try:
             cursor = self.conn.cursor()
-            step = 1000
 
-            logger.info('deleting duplicate from target table %s', table)
-            del_id_total = 0
-            for i in range(0, len(id_list)-1, step):
-                bulk_id = str(tuple(id_list[i:i+step]))
-                tgt_del_sql = "delete from %s WHERE id in %s" % (table, bulk_id)
+            logger.info('reading record of data file')
+            record_list = []
+            id_list = []
 
-                cursor.execute(tgt_del_sql)
+            block_size = 1000 # 1000 rows
+            line_num = 0
+            total_num = 0
+            rowCnt = 0
+            while 1:
+                line = dataFile.readline()
+                if not line.strip():
+                    logger.info('read data file completed, total [%s] rows', total_num)
+                    break
+                else:
+                    line_num += 1
 
-                del_row_count = cursor.rowcount
-                logger.debug('deleting %s rows', del_row_count)
-                del_id_total = del_id_total + cursor.rowcount
+                record = []
+                line = str(line).strip().split(ctrlSeparator)
+                for index in comm_col_index_list:
+                    try:
+                        record.append(line[index])
+                    except:
+                        print line
+                        print index
+                        exit()
 
-            logger.debug("total [%s] duplicate rows deleted", del_id_total)
+                record_list.append(record)  # collecting records list for inserting
 
-            logger.info('inserting new record into target table %s', table)
-            tgt_ins_sql = "INSERT INTO %s (%s) values (%s) " % (table, comm_col_str, col_position)
-            logger.debug('pre sql->%s', tgt_ins_sql)
-            ins_id_total = 0
-            for i in range(0, rowCnt, step):
-                bulk_record = record_list[i:i+step]
+                if line_num == block_size:
+                    logger.info('replacing into new record to target table %s', table)
+                    tgt_ins_sql = "REPLACE INTO %s (%s) values (%s) " % (table, comm_col_str, col_position)
 
-                cursor.executemany(tgt_ins_sql, bulk_record)
+                    cursor.executemany(tgt_ins_sql, record_list)
 
-                ins_row_count = cursor.rowcount
-                logger.debug('inserting %s rows', ins_row_count)
-                ins_id_total = ins_id_total + ins_row_count
-            logger.debug("total [%s] new rows inserted", ins_id_total)
+                    print(cursor.rowcount)
+
+
+                    record_list = []
+                    id_list = []
+                    line_num = 1
+                    continue
 
             messager['ctrl_count'] = rowCnt
             self.conn.commit()

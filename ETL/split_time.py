@@ -6,8 +6,6 @@ import datetime,time
 def split_time(from_date='2017-05-01', to_date='2017-05-10', hours=1):
 
     datetime_snipet_list = []
-    # one_block = {'from_time':'', 'to_time':''}
-
 
     from_datetime = datetime.datetime.strptime(from_date, '%Y-%m-%d')
     to_datetime = datetime.datetime.strptime(to_date, '%Y-%m-%d') + datetime.timedelta(seconds=-1)
