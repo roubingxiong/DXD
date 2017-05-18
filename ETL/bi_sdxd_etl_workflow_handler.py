@@ -1,10 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-from ETL.assistant import *
-from ETL.component.TableExtractor import TableExtractor
-from ETL.component.TableLoader import TableLoader
-from ETL.component import file_watcher
+from assistant import *
+from TableExtractor import TableExtractor
+from TableLoader import TableLoader
+import file_watcher
+# import TableLoader, TableExtractor, file_watcher
 from email_handler import *
 import argparse
 
