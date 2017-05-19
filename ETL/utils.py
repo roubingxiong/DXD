@@ -199,6 +199,8 @@ def get_decision_rule_log_table_list(messager, conn='None',):
     to_date = messager['to_date']
 
     log_tbl_sql = "SELECT CAST(apply_time as DATE) AS log_tbl_date FROM t_decision_application WHERE update_time >='%s' and update_time < '%s' GROUP BY 1;" % (from_date, to_date)
+    #log_tbl_sql = "SELECT DATE_FORMAT(apply_time, '%Y-%m-%d') log_tbl_date,CONCAT('t_decision_rule_log_', DATE_FORMAT(apply_time, '%Y%m%d')) AS log_table, min(update_time) AS min_update_time, max(update_time) AS max_update_time  FROM t_decision_application WHERE update_time >='2014-08-15' and update_time < '2017-05-11' GROUP BY 1;" % (from_date, to_date)
+
 
     try:
         cursor = conn.cursor()
@@ -260,3 +262,29 @@ def check_table(src_conn, table_name, tgt_conn='None' ):
                 raise
         else:
             logger.info("created target table->%s\n%s", table_name, create_table)
+
+
+def split_time(from_date='2017-05-01', to_date='2017-05-10', hours=1):
+
+    datetime_snippet_list = []
+
+    from_datetime = datetime.datetime.strptime(from_date, '%Y-%m-%d')
+    to_datetime = datetime.datetime.strptime(to_date, '%Y-%m-%d') + datetime.timedelta(seconds=-1) # not include the day
+
+    snippet_from_datetime = from_datetime
+    snippet_to_datetime = from_datetime
+
+    while snippet_to_datetime < to_datetime:
+        snippet = []
+        snippet_to_datetime = snippet_from_datetime + datetime.timedelta(hours=hours)
+        if snippet_to_datetime >= to_datetime:
+            snippet_to_datetime = to_datetime
+
+        snippet.append(snippet_from_datetime.strftime('%Y-%m-%d %H:%M:%S'))
+        snippet.append( snippet_to_datetime.strftime('%Y-%m-%d %H:%M:%S'))
+
+        snippet_from_datetime = snippet_to_datetime + datetime.timedelta(seconds=1)
+
+        datetime_snippet_list.append(snippet)
+
+    return datetime_snippet_list

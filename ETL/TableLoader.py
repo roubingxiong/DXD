@@ -21,7 +21,7 @@ class TableLoader(BaseReaderWriter):
 
     def loadFileToTable(self, messager, checkCtrlFile='Y'):
 
-        table = messager['table_name']
+        tableName = messager['table_name']
         ctrlFilePathName = messager['ctrl_path_file']
         dataFilePathName = messager['data_path_file']
 
@@ -53,7 +53,7 @@ class TableLoader(BaseReaderWriter):
         file_col_list = header.split(ctrlSeparator)  # ['C1', 'C2', 'C3']
         logger.info('columns list in header->%s', file_col_list)
 
-        tbl_col_list = self.getColumnList(table)    # ['C1', 'C3', 'C4']
+        tbl_col_list = self.getColumnList(tableName)    # ['C1', 'C3', 'C4']
         # logger.info('columns in target table %s->%s', table, tbl_col_list)
 
         comm_col_list = list(set(file_col_list).intersection(tbl_col_list))  # ['C1', 'C3']
@@ -100,18 +100,13 @@ class TableLoader(BaseReaderWriter):
                         record = []
                         line = str(line).strip().split(ctrlSeparator)
                         for index in comm_col_index_list:
-                            try:
-                                record.append(line[index])  # pick up common fields
-                            except:
-                                print line
-                                print index
-                                exit()
+                            record.append(line[index])  # pick up common fields
 
                         record_list.append(record)  # collecting records list for inserting
 
                     total_count = total_count + block_line_num
 
-                    tgt_ins_sql = "REPLACE INTO %s (%s) values (%s) " % (table, comm_col_str, col_position)
+                    tgt_ins_sql = "REPLACE INTO %s (%s) values (%s) " % (tableName, comm_col_str, col_position)
 
                     logger.info('replacing into [%s] rows to target table', block_line_num)
                     cursor.executemany(tgt_ins_sql, record_list)
@@ -131,10 +126,10 @@ class TableLoader(BaseReaderWriter):
             logger.exception('Exception occured while loading records, the transaction roll back, database would not be effected')
             raise
         else:
-            logger.info('Congrats! File loading successfully')
-        # finally:
-        #     ctrlFile.close()
-        #     dataFile.close()
+            logger.info('Congrats! Table [%s] loading successfully', tableName)
+        finally:
+            ctrlFile.close()
+            dataFile.close()
         #     # logger.info('close database connection')
         #     # self.conn.close()
         #     return messager

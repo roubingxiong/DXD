@@ -9,7 +9,7 @@ import logging
 import codecs
 import sys
 from BaseReaderWriter import BaseReaderWriter
-import split_time
+import utils
 
 
 logger = logging.getLogger('DXD_ETL')
@@ -28,30 +28,29 @@ class TableExtractor(BaseReaderWriter):
             table = messager['table_name']
             runMode = messager['run_mode']
             dataFile = codecs.open(dataFilePathName, 'w+', self.charset)
-            logger.info('create data file->%s', dataFilePathName)
+            logger.info('create and open data file->%s', dataFilePathName)
             ctrlFile = codecs.open(ctrlFilePathName, 'w+', self.charset)
-            logger.info('create control file->%s', ctrlFilePathName)
+            logger.info('create and open control file->%s', ctrlFilePathName)
         except:
             raise
 
         try:
             col_list = self.getColumnList(table)
 
+            separator = delimiter
+            header = separator.join(col_list) #header in data file -> C1|~|C2|~|C3
+
+            logger.info('writing header to data file->%s', header)
+            dataFile.write(header + '\n')
+
             col_str_list = []
             for col in col_list:
                 col_str_list.append("ifnull(%s, '')" % col)  #  convert null to empty, otherwise the column would be missed in data file
 
             col_str = ','.join(col_str_list) #used in sql
-
-            separator = delimiter
-            header = separator.join(col_list) #used in data file
-
             logger.info('column->%s',col_str)
 
-            logger.info('writing header to data file\n%s', header)
-            dataFile.write(header + '\n')
-
-            datetime_snipet_list = split_time.split_time(from_date=fromDateStr, to_date=toDateStr, hours=1)
+            datetime_snipet_list = utils.split_time(from_date=fromDateStr, to_date=toDateStr, hours=1)
             ctrlCnt = 0
             cursor = self.conn.cursor()
             for from_time, to_time in datetime_snipet_list:
@@ -81,10 +80,10 @@ class TableExtractor(BaseReaderWriter):
             dataFile.close()
             os.remove(dataFilePathName)
             os.remove(ctrlFilePathName)
-            logger.exception('Exception occurred while generating data&control file. All database operation rollback, data and control file removed')
+            logger.error('Exception occurred while generating data&control file. All database operation rollback, data and control file removed')
             raise
         else:
-            logger.info('Congrats! Table %s extracted successfully!', table)
+            logger.info('Congrats! Table [%s] extracted successfully!', table)
         # finally:
             # logger.info('close database connection')
             # self.conn.close()

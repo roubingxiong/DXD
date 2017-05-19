@@ -1,13 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-from assistant import *
+from utils import *
 from TableExtractor import TableExtractor
 from TableLoader import TableLoader
 import file_watcher
 # import TableLoader, TableExtractor, file_watcher
-from email_handler import *
+import email_handler
 import argparse
+import utils
 
 
 def parse_args():
@@ -61,7 +62,7 @@ if __name__ == "__main__":
 
         # preparing table list for processing
         if tblName.lower() == 't_decision_rule_log':
-            messager = rebuild_messager(actionType, runDate, runMode, tblName, config, logger_file, messager)
+            messager = utils.rebuild_messager(actionType, runDate, runMode, tblName, config, logger_file, messager)
             table_list = get_decision_rule_log_table_list(messager=messager, conn=src_conn)
         elif tblName == 'normal':
             table_list_file = config.get('global', 'table_list')
@@ -70,22 +71,22 @@ if __name__ == "__main__":
             table_list_file = config.get('global','table_list')
             table_list = get_table_list(table_list_file)
 
-            messager = rebuild_messager(actionType, runDate, runMode, 't_decision_rule_log', config, logger_file, messager)
+            messager = utils.rebuild_messager(actionType, runDate, runMode, 't_decision_rule_log', config, logger_file, messager)
             log_table_list = get_decision_rule_log_table_list(src_conn, messager)
 
             table_list = table_list + log_table_list
         else:
             table_list = [tblName]
-        logger.info('full pending tables for processing->%s', table_list)
+        logger.info('full list of pending tables->%s', table_list)
 
-        # core flow for extracting or loading data
+        # core workflow for extracting or loading data
         if actionType == 'extract':
             logger.info('********** creating table extractor **********')
             extractor = TableExtractor(src_conn)
             for table in table_list:
                 try:
                     logger.info('>>>>>>>>>> extracting table->%s >>>>>>>>>>', table)
-                    messager = rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
+                    messager = utils.rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
                     check_table(src_conn=src_conn, table_name=table)
                     extractor.extractTableToFile(messager)
                 except Exception as e:
@@ -104,7 +105,7 @@ if __name__ == "__main__":
             for table in table_list:
                 try:
                     logger.info('>>>>>>>>>> loading table->%s >>>>>>>>>>', table)
-                    messager = rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
+                    messager = utils.rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
                     check_table(src_conn=src_conn, tgt_conn=tgt_conn, table_name=table)
                     ctrl_file = messager['ctrl_file'] # tableName.ctrl.yyyymmdd.yyyymmdd
                     if file_watcher.watch_file(dir=data_hub, filename=ctrl_file):
@@ -139,4 +140,4 @@ if __name__ == "__main__":
         log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
     finally:
         logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        # sendJobStatusEmail(config=config, messager=status_list, attachment=[logger_file])
+        # email_handler.sendJobStatusEmail(config=config, messager=status_list, attachment=[logger_file])
