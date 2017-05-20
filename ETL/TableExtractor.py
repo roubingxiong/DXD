@@ -25,6 +25,8 @@ class TableExtractor(BaseReaderWriter):
             dataFilePathName = messager['data_path_file']
             fromDateStr = messager['from_date']
             toDateStr = messager['to_date']
+            fromTime = messager['from_time']
+            toTime = messager['to_time']
             table = messager['table_name']
             runMode = messager['run_mode']
             dataFile = codecs.open(dataFilePathName, 'w+', self.charset)
@@ -50,13 +52,14 @@ class TableExtractor(BaseReaderWriter):
             col_str = ','.join(col_str_list) #used in sql
             logger.info('column->%s',col_str)
 
-            datetime_snipet_list = utils.split_time(from_date=fromDateStr, to_date=toDateStr, hours=1)
+            datetime_snipet_list = utils.split_time(from_datetime=fromTime, to_datetime=toTime, hours=1)   #  time duration splited every number of hours
+
             ctrlCnt = 0
             cursor = self.conn.cursor()
-            for from_time, to_time in datetime_snipet_list:
-                ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '')  FROM %s where update_time>='%s' and update_time<='%s';" % (separator, col_str, table, from_time, to_time) # not include end date
+            for from_datetime, to_datetime in datetime_snipet_list:
+                ex_sql = "select REPLACE(REPLACE(concat_ws('%s',%s), CHAR(10), ''), CHAR(13), '')  FROM %s where update_time>='%s' and update_time<='%s';" % (separator, col_str, table, from_datetime, to_datetime) # not include end date
 
-                logger.info('running extract sql->%s', ex_sql)
+                logger.debug('running extract sql->%s', ex_sql)
                 cursor.execute(ex_sql)
                 row_count = cursor.rowcount;
                 ctrlCnt = ctrlCnt + row_count
@@ -65,7 +68,7 @@ class TableExtractor(BaseReaderWriter):
                     dataFile.write(row[0] + '\n')
                     dataFile.flush()
 
-                logger.debug('batch read and write [%s] rows', row_count)
+                logger.info('batch read and write [%s] rows', row_count)
 
             logger.debug('total [%s] rows return', ctrlCnt)
 
@@ -84,11 +87,7 @@ class TableExtractor(BaseReaderWriter):
             raise
         else:
             logger.info('Congrats! Table [%s] extracted successfully!', table)
-        # finally:
-            # logger.info('close database connection')
-            # self.conn.close()
-            # return messager
-            # pass
+
 
 
 

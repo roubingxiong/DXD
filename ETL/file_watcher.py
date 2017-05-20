@@ -13,37 +13,36 @@ logger = logging.getLogger('DXD_ETL')
 def watch_file(dir, filename, expireTime=1800):
     absFile = os.path.join(dir, filename)
     logger.info('start watching file %s', absFile)
-    # print "-INFO: start watching file %s"%(absFile)
 
-    this = last = size = 0
+    sec_step = 5  #seconds each check
+    sec_timer = 0
 
-    freq = 5 #10s each check
+    check_num = 0
+    while sec_timer < expireTime:
 
-    check_times_limitation = expireTime/freq
-
-    for i in range(check_times_limitation):
         if os.path.isfile(absFile) and os.access(absFile, os.R_OK):
-            prop = os.stat(absFile)
-            size = prop.st_size
-            this = prop.st_mtime
-            # print this, last
+            curr_modify_time = os.stat(absFile).st_mtime
+            curr_size = os.stat(absFile).st_size
+            check_num += 1
 
-        if this == last and this <> 0:
-            # print "cool! the file is coming and it is stable"
-            logger.info('cool! %s is coming and it is stable',absFile)
-            return filename
-        elif size == 0 and this <>0:
-            logger.error('%s is coming, but is an empty file', absFile)
-            # print "the file is coming, but is an empty file"
-            return False
-        else:
-            last = this
+            if check_num == 1:
+                prev_modify_time = curr_modify_time
+                check_num += 1
+            elif prev_modify_time == curr_modify_time:
+                if curr_size > 0:
+                    logger.info('cool! %s is coming and it is stable',absFile)
+                    return filename
+                else:
+                    logger.error('%s is coming, but is an empty file', absFile)
+                    return False
+                # break
+            else:
+                check_num = 0  # rest check num
 
-        time.sleep(freq)
-
-    # print 'file watching run out of time'
-    logger.error('%s is not exist, file watching run out of %s seconds', absFile, expireTime)
-    raise Exception(absFile + ' is not exist, file watching run out of ' + str(expireTime) + ' seconds' )
+        time.sleep(sec_step)
+        sec_timer = sec_timer + sec_step
+    else:
+        raise Exception(absFile + ' is not exist, file watching run out of ' + str(expireTime) + ' seconds')
 
 
 def watch_files(dir, pattern='t_decision_rule_log_[0-9]{8}.ctrl.[0-9]{8}.[0-9]{8}'):

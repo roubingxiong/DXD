@@ -12,12 +12,20 @@ from email_handler import *
 
 logger = logging.getLogger('DXD_ETL')
 
+def build_message_box(actionType, runDate, runMode, tableName, config=ConfigParser.ConfigParser(), logFile='', srcConn=None, tgtConn=None):
+    # msg = {'table_name':None  ,'data_file':None ,'ctrl_file':None ,'ctrl_count':None
+    #     ,'data_path_file':None ,'ctrl_path_file':None , 'from_time':None , 'to_time':None, 'status':None
+    #     , 'from_date':None, 'to_date':None, 'action_type':None, 'run_mode':None}
+    msg_list = []
 
-def rebuild_messager(actionType, runDate, runMode, tblName, config, logFile, messager):
-    messager['config'] = config
-    messager['log'] = logFile
+    env_info = {'action_type':None, 'run_mode':None, 'config':None, 'log_file':None, 'from_date':None, 'to_date':None, 'data_hub':None}
+
+    commander = {'env_info':None, 'msg_list':None}
+
     default_run_mode = 't+3'
 
+    logger.info('preparing environment variables')
+    # preparing environment variables
     if runMode in ('None', ''):
         try:
             runMode = config.get('global', 'runMode')
@@ -27,48 +35,95 @@ def rebuild_messager(actionType, runDate, runMode, tblName, config, logFile, mes
             logger.debug("run mode do not assigned, using default value '%s'", default_run_mode)
             runMode = default_run_mode
 
-    messager['run_mode'] = runMode
-
     offset = runMode.replace(' ', '').replace('T', '').replace('t', '')
-    logger.debug('offset %s days',offset)
 
-    try:
-        if runDate in ('None', ''):
-            runDate = datetime.datetime.today()
-            logger.warn("run date not assigned, using the date of today as the run date")
-        else:
-            runDate = datetime.datetime.strptime(runDate, '%Y%m%d')
-
-        to_date = runDate
-        from_date = to_date - datetime.timedelta(days=int(offset))
-
-        format_from_date = from_date.strftime('%Y%m%d')
-        format_to_date = to_date.strftime('%Y%m%d')
-
-        to_date = to_date.strftime('%Y-%m-%d')
-        from_date = from_date.strftime('%Y-%m-%d')
-    except:
-        logger.error("date '%s' is not match the format(yyyymmdd) or a invalid date", runDate)
-        raise
+    if runDate in ('None', ''):
+        runDate = datetime.datetime.today()
+        logger.warn("run date not assigned, using the date of today as the run date")
     else:
-        messager['from_date'] = from_date
-        messager['to_date'] = to_date
-        logger.info('will process data updated from %s to %s(not included)', from_date, to_date)
+        runDate = datetime.datetime.strptime(runDate, '%Y%m%d')
 
-    messager['action_type'] = actionType
-    messager['table_name'] = tblName
-    messager['data_hub'] = config.get('global', 'data_hub')
-    messager['data_file'] = tblName + ".dat." + format_from_date + "." + format_to_date
-    messager['ctrl_file'] = tblName + ".ctrl." + format_from_date + "." + format_to_date
-    messager['ctrl_count'] = ''
-    messager['data_path_file'] = os.path.join(messager['data_hub'] , messager['data_file'])
-    messager['ctrl_path_file'] = os.path.join(messager['data_hub'] , messager['ctrl_file'])
+    to_date = runDate
+    from_date = to_date - datetime.timedelta(days=int(offset))
 
-    logger.info('\naction: %s\nrun_date: %s\nmode: %s\ntable: %s\nfrom: %s\nto: %s', actionType, to_date, runMode, tblName, from_date, to_date)
+    from_date_yyyy_mm_dd = from_date.strftime('%Y-%m-%d')
 
-    messager['status'] = 'Start'
+    to_date_yyyymmdd = to_date.strftime('%Y%m%d')
+    from_date_yyyymmdd = from_date.strftime('%Y%m%d')
 
-    return messager
+    to_time_Y_m_d_H_M_S = (to_date - datetime.timedelta(seconds=1)).strftime('%Y-%m-%d %H:%M:%S')  # to_date - 1 second = including last second of previous day
+    from_time_Y_m_d_H_M_S = from_date.strftime('%Y-%m-%d %H:%M:%S')
+
+    to_date = to_date - datetime.timedelta(days=1)  # reset to_date to be previous day
+    to_date_yyyy_mm_dd = to_date.strftime('%Y-%m-%d')
+
+    data_hub = config.get('global', 'data_hub')
+
+    # load environment information
+    env_info['action_type'] = actionType
+    env_info['run_mode'] = runMode
+    env_info['config'] = config
+    env_info['from_date'] = from_date_yyyy_mm_dd
+    env_info['to_date'] = to_date_yyyy_mm_dd
+    env_info['log_file'] = logFile
+    env_info['data_hub'] = data_hub
+
+    logger.debug('base environment information:\n%s', env_info)
+
+    logger.info('preparing table cases')
+    table_metadata_list = []
+
+    if not srcConn:
+        src_conn = get_conn_by_type(config=config, type='source')
+    else:
+        src_conn = srcConn
+
+    if tableName.lower() == 't_decision_rule_log':
+        table_metadata_list = get_decision_rule_log_table_list(from_time=from_time_Y_m_d_H_M_S, to_time=to_time_Y_m_d_H_M_S, conn=src_conn)
+    elif tableName == 'normal':
+        table_list_file = config.get('global', 'table_list')
+        table_metadata_list = get_table_list(table_list_file)
+    elif tableName == 'all':
+        table_list_file = config.get('global','table_list')
+        table_metadata_list = get_table_list(table_list_file)
+
+        log_table_metadata_list = get_decision_rule_log_table_list(from_time=from_time_Y_m_d_H_M_S, to_time=to_time_Y_m_d_H_M_S, conn=src_conn)
+
+        table_metadata_list = table_metadata_list + log_table_metadata_list
+    else:
+        table_metadata_list = [(tableName, '', '')]
+
+    for table_name, from_time, to_time in table_metadata_list:
+        msg = {}
+        msg['table_name'] = table_name
+        msg['data_hub'] = config.get('global', 'data_hub')
+
+        data_file = table_name + ".dat." + from_date_yyyymmdd + "." + to_date_yyyymmdd
+        msg['data_file'] = data_file
+
+        ctrl_file = table_name + ".ctrl." + from_date_yyyymmdd + "." + to_date_yyyymmdd
+        msg['ctrl_file'] = ctrl_file
+
+        msg['ctrl_count'] = ''
+        msg['data_path_file'] = os.path.join(data_hub , data_file)
+        msg['ctrl_path_file'] = os.path.join(data_hub , ctrl_file)
+        if not '' in (from_time, to_time):
+            msg['from_time'] = from_time
+            msg['to_time'] = to_time
+        else:
+            msg['from_time'] = from_time_Y_m_d_H_M_S
+            msg['to_time'] = to_time_Y_m_d_H_M_S
+
+        msg['status'] = ''
+
+        msg_list.append(msg)
+
+    logger.debug('metadata for processing tables:\n%s', msg_list)
+
+    commander['env_info'] = env_info
+    commander['msg_list'] = msg_list
+
+    return commander
 
 
 def get_config(cfg_dir):
@@ -85,34 +140,6 @@ def get_config(cfg_dir):
     config = ConfigParser.ConfigParser()
     config.read(cfgfile)
     return config
-
-
-def get_logger(curr_dir, table_name, run_date, start_time, action_type):
-
-    log_dir = os.path.join(curr_dir, 'log')
-    if not os.path.isdir(log_dir):
-        print '%s is not exist, now creating it'%log_dir
-        os.mkdir(log_dir)
-
-    logger = logging.getLogger('DXD_ETL')
-    logger.setLevel(logging.DEBUG)
-
-    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(name)s] - %(filename)s - %(funcName)s - %(message)s')
-
-    # file Handler
-    logger_file = os.path.join(log_dir, "%s_%s_%s_%s_%s.log"%(os.path.basename(__file__), action_type, table_name, run_date, start_time))
-    log_file_handler = logging.FileHandler(logger_file)
-    log_file_handler.setFormatter(log_formatter)
-
-    # console Handler
-    log_console_handler = logging.StreamHandler()
-    log_console_handler.setLevel(logging.DEBUG)
-    log_console_handler.setFormatter(log_formatter)
-
-    logger.addHandler(log_file_handler)
-    logger.addHandler(log_console_handler)
-
-    return logger, logger_file
 
 
 def get_conn_by_type(config, type):
@@ -135,9 +162,9 @@ def get_conn_by_type(config, type):
     return conn
 
 
-def get_report_file(rpt_dir, table_name, run_date, action_type):
+def get_report_file(rpt_dir, table_name, run_date, action_type, from_date, to_date):
 
-    base_name = "%s_%s_%s.rpt" % (action_type,table_name, run_date)
+    base_name = "%s_%s_%s_%s_%s.rpt" % (action_type, run_date, table_name, from_date, to_date)
     abs_file = os.path.join(rpt_dir, base_name)
 
     try:
@@ -178,49 +205,61 @@ def get_status_list(file, from_date, to_date):
         return status_list
 
 
-def get_table_list(file):
-    table_list = []
+def get_init_status_list(action_type, table_name, run_mode, to_date):
+    # print(file)
+    status_list = []
+
+    row = {}
+    row['action_type'] = action_type
+    row['table_name'] = table_name
+    row['data_file'] = ''
+    row['ctrl_file'] = ''
+    row['ctrl_count'] = ''
+    row['status'] = 'Fail'
+    row['run_mode'] = run_mode
+    row['from_date'] = ''
+    row['to_date'] = to_date
+
+    status_list.append(row)
+
+    return status_list
+
+
+def get_table_list(table_list_file):
+
+    table_metadata_list = []
+
     try:
-        with open(file, 'r') as tbl:
+        with open(table_list_file, 'r') as tbl:
             for line in tbl.readlines():
-                table_list.append(line.strip())
+                table_metadata = (line.strip(), '', '') #(table_name, from_time, to_time)
+                table_metadata_list.append(table_metadata)
     except:
         raise
     finally:
-        logger.info('get table list->%s', table_list)
-        return table_list
+        return table_metadata_list
 
 
-def get_decision_rule_log_table_list(messager, conn='None',):
+def get_decision_rule_log_table_list(from_time, to_time, conn):
 
-    log_tbl_date_list = []
-    log_table_list = []
-    from_date = messager['from_date']
-    to_date = messager['to_date']
+    table_metadata_list = []
 
-    log_tbl_sql = "SELECT CAST(apply_time as DATE) AS log_tbl_date FROM t_decision_application WHERE update_time >='%s' and update_time < '%s' GROUP BY 1;" % (from_date, to_date)
-    #log_tbl_sql = "SELECT DATE_FORMAT(apply_time, '%Y-%m-%d') log_tbl_date,CONCAT('t_decision_rule_log_', DATE_FORMAT(apply_time, '%Y%m%d')) AS log_table, min(update_time) AS min_update_time, max(update_time) AS max_update_time  FROM t_decision_application WHERE update_time >='2014-08-15' and update_time < '2017-05-11' GROUP BY 1;" % (from_date, to_date)
-
+    # log_tbl_sql = "SELECT CAST(apply_time as DATE) AS log_tbl_date FROM t_decision_application WHERE update_time >='%s' and update_time < '%s' GROUP BY 1;" % (from_time, to_time)
+    log_tbl_sql = "SELECT CONCAT('t_decision_rule_log_', DATE_FORMAT(apply_time, '%%Y%%m%%d')) AS log_table, CAST(min(update_time) AS CHAR(19)) AS min_update_time, CAST(max(update_time) AS CHAR(19)) AS max_update_time  FROM t_decision_application WHERE update_time >='%s' and update_time <= '%s' GROUP BY 1;" % (from_time, to_time)
 
     try:
         cursor = conn.cursor()
         logger.info('running sql to get log table date->%s', log_tbl_sql)
         cursor.execute(log_tbl_sql)
-        log_tbl_date_list = cursor.fetchall()
 
+        for item in cursor.fetchall():
+            table_metadata_list.append(item)
+
+        logger.debug('get metadata for incremental(table_name, min_update_time, max_update_time):\n%s',table_metadata_list)
     except:
         raise
-
-    for date_str in log_tbl_date_list:
-        date_str = date_str[0]
-        date_format = date_str.strftime('%Y%m%d') #datetime.datetime.strptime(date_str, '%Y-%m-%d').strftime('%Y%m%d')
-        log_table = 't_decision_rule_log_' + date_format
-        log_table_list.append(log_table)
-
-    logger.info('get decision rule log table list->%s', log_table_list)
-
-    return log_table_list
-
+    finally:
+        return table_metadata_list
 
 def write_rept(report, messager):
     action = messager['action_type']
@@ -264,27 +303,25 @@ def check_table(src_conn, table_name, tgt_conn='None' ):
             logger.info("created target table->%s\n%s", table_name, create_table)
 
 
-def split_time(from_date='2017-05-01', to_date='2017-05-10', hours=1):
+def split_time(from_datetime='1900-01-01 00:00:00', to_datetime='1900-01-01 23:59:59', hours=1):
 
     datetime_snippet_list = []
 
-    from_datetime = datetime.datetime.strptime(from_date, '%Y-%m-%d')
-    to_datetime = datetime.datetime.strptime(to_date, '%Y-%m-%d') + datetime.timedelta(seconds=-1) # not include the day
+    from_datetime = datetime.datetime.strptime(from_datetime, '%Y-%m-%d %H:%M:%S')
+    to_datetime = datetime.datetime.strptime(to_datetime, '%Y-%m-%d %H:%M:%S')
 
     snippet_from_datetime = from_datetime
     snippet_to_datetime = from_datetime
 
     while snippet_to_datetime < to_datetime:
-        snippet = []
+
         snippet_to_datetime = snippet_from_datetime + datetime.timedelta(hours=hours)
         if snippet_to_datetime >= to_datetime:
             snippet_to_datetime = to_datetime
 
-        snippet.append(snippet_from_datetime.strftime('%Y-%m-%d %H:%M:%S'))
-        snippet.append( snippet_to_datetime.strftime('%Y-%m-%d %H:%M:%S'))
+        datetime_snippet_list.append((snippet_from_datetime.strftime('%Y-%m-%d %H:%M:%S'), snippet_to_datetime.strftime('%Y-%m-%d %H:%M:%S')))
 
         snippet_from_datetime = snippet_to_datetime + datetime.timedelta(seconds=1)
 
-        datetime_snippet_list.append(snippet)
-
+    # print(datetime_snippet_list)
     return datetime_snippet_list

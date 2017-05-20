@@ -32,9 +32,9 @@ class TableLoader(BaseReaderWriter):
             ctrlFile = open(ctrlFilePathName, 'r')
             # ctrlFile = codecs.open(ctrlFilePathName, 'r', self.charset)
             logger.info('openings data file->%s', ctrlFilePathName)
-        except Exception as e:
+        except:
             logger.error('failed to open data file(%s) or control file(%s)', dataFilePathName, ctrlFilePathName)
-            raise e
+            raise
 
         logger.info('reading control file')
         ctrlInfo = ctrlFile.readlines()
@@ -82,8 +82,10 @@ class TableLoader(BaseReaderWriter):
         try:
             cursor = self.conn.cursor()
 
-            block_size = int(0.5*1024*1024) # 0.5 MB
-            logger.info('data file block size for reading each time is [%s] KB', block_size)
+            MB = 0.5
+            block_size = int(MB*1024*1024) # 0.5 MB
+
+            logger.info('data file block size for reading each time is [%s] MB', MB)
             total_count = 0
             while True:
                 lines = dataFile.readlines(block_size)
@@ -91,7 +93,6 @@ class TableLoader(BaseReaderWriter):
                 if not lines:
                     logger.info('complete to read and update records, total [%s] rows', total_count)
                     break
-
                 else:
                     record_list = []
                     block_line_num = 0
@@ -130,9 +131,3 @@ class TableLoader(BaseReaderWriter):
         finally:
             ctrlFile.close()
             dataFile.close()
-        #     # logger.info('close database connection')
-        #     # self.conn.close()
-        #     return messager
-
-
-

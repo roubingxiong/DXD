@@ -11,8 +11,8 @@ import time
 import ConfigParser
 import os
 import logging
-logger = logging.getLogger('DXD_ETL')
 
+logger = logging.getLogger('DXD_ETL')
 
 def write_report_email(messager=[], attachment=[]):
     msg_list = []

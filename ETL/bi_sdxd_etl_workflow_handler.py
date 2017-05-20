@@ -10,6 +10,33 @@ import email_handler
 import argparse
 import utils
 
+def get_logger(curr_dir, table_name, run_date, start_time, action_type):
+
+    log_dir = os.path.join(curr_dir, 'log')
+    if not os.path.isdir(log_dir):
+        print '%s is not exist, now creating it'%log_dir
+        os.mkdir(log_dir)
+
+    logger = logging.getLogger('DXD_ETL')
+    logger.setLevel(logging.DEBUG)
+
+    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(name)s] - %(filename)s - %(funcName)s - %(message)s')
+
+    # file Handler
+    logger_file = os.path.join(log_dir, "%s_%s_%s_%s_%s.log"%(os.path.basename(__file__), action_type, table_name, run_date, start_time))
+    log_file_handler = logging.FileHandler(logger_file)
+    log_file_handler.setFormatter(log_formatter)
+
+    # console Handler
+    log_console_handler = logging.StreamHandler()
+    log_console_handler.setLevel(logging.DEBUG)
+    log_console_handler.setFormatter(log_formatter)
+
+    logger.addHandler(log_file_handler)
+    logger.addHandler(log_console_handler)
+
+    return logger, logger_file
+
 
 def parse_args():
     global runDate, runMode, actionType, tblName
@@ -36,108 +63,104 @@ if __name__ == "__main__":
     today_str = datetime.datetime.today().strftime('%Y%m%d')
     curr_dir = os.path.dirname(__file__)
 
-    messager = {'table_name': '', 'action_type':'','data_hub':'',  'data_file': '', 'ctrl_file': '', 'ctrl_count': '', 'data_path_file': '', 'ctrl_path_file': '', 'status': 'Start', 'from_date': '9999-12-31', 'to_date': '9999-12-31','log':'log'}
-    status_list = [messager]
-
     print '-INFO: parsing arguments'
-    #global runDate, runMode, actionType, tblName
+    # parsing & validate arguments
     runDate, runMode, actionType, tblName = parse_args()
 
-    # preparing logger
-    #global logger
-    logger, logger_file = get_logger(curr_dir=curr_dir, table_name=tblName, run_date=runDate, start_time=start_time, action_type=actionType)
-    logger.info('job start at %s', start_time)
+    # initial status list
+    status_list = get_init_status_list(action_type=actionType, table_name=tblName, run_mode=runMode, to_date=runDate)
 
     try:
+        # preparing logger
+        logger, logger_file = get_logger(curr_dir=curr_dir, table_name=tblName, run_date=runDate, start_time=start_time, action_type=actionType)
+        logger.info('---------- workflow start at %s----------', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
         logger.info('get configuration from config file')
         config = get_config(cfg_dir=curr_dir)
-
-        rpt_dir = config.get('global', 'report_dir')
-        report_file_name, report_file = get_report_file(rpt_dir=rpt_dir, table_name=tblName, run_date=runDate, action_type=actionType)
 
         # get database connection
         tgt_conn = get_conn_by_type(config, 'target')
         src_conn = get_conn_by_type(config, 'source')
         data_hub = config.get('global', 'data_hub')
 
-        # preparing table list for processing
-        if tblName.lower() == 't_decision_rule_log':
-            messager = utils.rebuild_messager(actionType, runDate, runMode, tblName, config, logger_file, messager)
-            table_list = get_decision_rule_log_table_list(messager=messager, conn=src_conn)
-        elif tblName == 'normal':
-            table_list_file = config.get('global', 'table_list')
-            table_list = get_table_list(table_list_file)
-        elif tblName == 'all':
-            table_list_file = config.get('global','table_list')
-            table_list = get_table_list(table_list_file)
+        logger.info('build message box')
+        commander = build_message_box(actionType=actionType, runDate=runDate, runMode=runMode, tableName=tblName, config=config, logFile=logger_file, srcConn=src_conn)
+        msg_list = commander['msg_list']
+        env_info = commander['env_info']
 
-            messager = utils.rebuild_messager(actionType, runDate, runMode, 't_decision_rule_log', config, logger_file, messager)
-            log_table_list = get_decision_rule_log_table_list(src_conn, messager)
+        logger.info('getting report file')
+        from_date = env_info['from_date']
+        to_date = env_info['to_date']
+        rpt_dir = config.get('global', 'report_dir')
+        report_file_name, report_file = get_report_file(rpt_dir=rpt_dir, table_name=tblName, run_date=runDate, action_type=actionType, from_date=from_date, to_date=to_date)
 
-            table_list = table_list + log_table_list
-        else:
-            table_list = [tblName]
-        logger.info('full list of pending tables->%s', table_list)
 
         # core workflow for extracting or loading data
         if actionType == 'extract':
             logger.info('********** creating table extractor **********')
             extractor = TableExtractor(src_conn)
-            for table in table_list:
+            for msg in msg_list:
                 try:
-                    logger.info('>>>>>>>>>> extracting table->%s >>>>>>>>>>', table)
-                    messager = utils.rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
-                    check_table(src_conn=src_conn, table_name=table)
-                    extractor.extractTableToFile(messager)
+                    table_name = msg['table_name']
+                    logger.info('>>>>>>>>>> extracting table->%s >>>>>>>>>>', table_name)
+                    msg = dict(msg, **env_info)  # attach the env_info
+                    check_table(src_conn=src_conn, table_name=table_name)
+                    extractor.extractTableToFile(msg)
                 except Exception as e:
-                    messager['status'] = 'Fail'
+                    msg['status'] = 'Fail'
                     logger.exception(e.message)
                 else:
-                    messager['status'] = 'Success'
+                    msg['status'] = 'Success'
                 finally:
-                    logger.debug(messager)
-                    logger.info('<<<<<<<<<< end extract table->%s <<<<<<<<<<', table)
-                    write_rept(report_file, messager)
+                    logger.debug(msg)
+                    logger.info('<<<<<<<<<< end extract table->%s <<<<<<<<<<', table_name)
+                    write_rept(report_file, msg)
 
         elif actionType == 'load':
             logger.info('********** creating table loader **********')
             loader = TableLoader(tgt_conn)
-            for table in table_list:
+            for msg in msg_list:
                 try:
-                    logger.info('>>>>>>>>>> loading table->%s >>>>>>>>>>', table)
-                    messager = utils.rebuild_messager(actionType, runDate, runMode, table, config, logger_file, messager)
-                    check_table(src_conn=src_conn, tgt_conn=tgt_conn, table_name=table)
-                    ctrl_file = messager['ctrl_file'] # tableName.ctrl.yyyymmdd.yyyymmdd
+                    table_name = msg['table_name']
+                    logger.info('>>>>>>>>>> loading table->%s >>>>>>>>>>', table_name)
+                    msg = dict(msg, **env_info)  # merge msg and env_info
+                    check_table(src_conn=src_conn, tgt_conn=tgt_conn, table_name=table_name)
+                    ctrl_file = msg['ctrl_file'] # tableName.ctrl.yyyymmdd.yyyymmdd
                     if file_watcher.watch_file(dir=data_hub, filename=ctrl_file):
-                        loader.loadFileToTable(messager)
+                        loader.loadFileToTable(msg)
                 except Exception as e:
-                    messager['status'] = 'Fail'
+                    msg['status'] = 'Fail'
                     logger.exception(e.message)
                 else:
-                    messager['status'] = 'Success'
+                    msg['status'] = 'Success'
                 finally:
-                    logger.debug(messager)
-                    logger.info('<<<<<<<<<< end load table->%s <<<<<<<<<<', table)
-                    write_rept(report_file, messager)
+                    logger.debug(msg)
+                    logger.info('<<<<<<<<<< end load table->%s <<<<<<<<<<', table_name)
+                    write_rept(report_file, msg)
 
         logger.info('getting status list for email')
-        status_list = get_status_list(report_file_name, messager['from_date'], messager['to_date'])
+        status_list = get_status_list(report_file_name, env_info['from_date'], env_info['to_date'])
     except Exception as e:
         logger.exception(e.message)
         logger.error('some exception occurred, please check exception message')
         raise
     else:
-        logger.info('The Flow complete successfully')
 
         logger.info('clean report file older than 30 days')
         data_file_list = file_watcher.clean_file(dir=rpt_dir, days=30)
 
         logger.info('clean data file older than 7 days')
-        data_file_list = file_watcher.clean_file(dir=messager['data_hub'], days=7)
+        data_file_list = file_watcher.clean_file(dir=data_hub, days=7)
 
         logger.info('clean log file older than 30 days')
         log_dir = os.path.dirname(logger_file)
         log_file_list = file_watcher.clean_file(dir=log_dir, days=30)
     finally:
-        logger.info('complete at %s', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        # email_handler.sendJobStatusEmail(config=config, messager=status_list, attachment=[logger_file])
+        tgt_conn.close()
+        src_conn.close()
+        report_file.close()
+
+        logger.info('sending email notification')
+        email_handler.sendJobStatusEmail(config=config, messager=status_list, attachment=[logger_file])
+
+        logger.info('---------- workflow complete at %s----------', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
