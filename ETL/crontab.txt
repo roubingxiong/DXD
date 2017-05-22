@@ -1,1 +1,12 @@
 
+5 0 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a extract -t normal 
+0 1 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a load -t normal 
+        
+30 1 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a extract -t t_decision_rule_log 
+0 3 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a load -t t_decision_rule_log 
+        
+5 12 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a extract -t normal 
+0 13 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a load -t normal 
+        
+0 14 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a extract -t t_decision_rule_log 
+0 15 * * * python /home/r_user/DXD/ETL/bi_sdxd_etl_workflow_handler.py -a load -t t_decision_rule_log 
